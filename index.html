@@ -1,0 +1,1002 @@
+<meta charset="utf-8">
+<title>Mr. Ivan's Shift</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: a calm nurses'-station clipboard — obs-chart grid paper, a patient wristband as the hero,
+   a ward map of story chapters, and side rooms for puzzles, cards and the reference file. */
+:root{
+  --paper:#F3F7F6; --card:#FFFFFF; --ink:#14262F; --muted:#56696F; --line:#D3DFDC; --grid:rgba(15,118,110,.07);
+  --teal:#0E7A70; --teal-soft:#DDF0EC; --sun:#E9B42A; --sun-soft:#FBF0D2; --coral:#C95A3E; --coral-soft:#F8E3DC;
+  --ok:#2E8A57; --ok-soft:#DDF1E4; --lav:#6D5BB5; --lav-soft:#ECE8F8;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0D181C; --card:#14232A; --ink:#E4EEEE; --muted:#97AAAF; --line:#24383F; --grid:rgba(59,191,176,.06);
+  --teal:#43C1B2; --teal-soft:#16363A; --sun:#E9BE4A; --sun-soft:#3A3219; --coral:#EE8C70; --coral-soft:#3D2620;
+  --ok:#62C98E; --ok-soft:#173528; --lav:#A99BEA; --lav-soft:#27233F; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#0D181C; --card:#14232A; --ink:#E4EEEE; --muted:#97AAAF; --line:#24383F; --grid:rgba(59,191,176,.06);
+  --teal:#43C1B2; --teal-soft:#16363A; --sun:#E9BE4A; --sun-soft:#3A3219; --coral:#EE8C70; --coral-soft:#3D2620;
+  --ok:#62C98E; --ok-soft:#173528; --lav:#A99BEA; --lav-soft:#27233F; color-scheme:dark;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:26px 26px;}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:clamp(1.45rem,3.2vw,1.9rem);font-weight:800}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--card);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:800;font-size:1.15rem;display:flex;align-items:center;gap:8px;background:none;border:0;padding:0}
+.brand .cross{width:22px;height:22px;border-radius:6px;background:var(--teal);position:relative;flex:none}
+.brand .cross::before,.brand .cross::after{content:"";position:absolute;background:var(--card);border-radius:1px}
+.brand .cross::before{left:9px;top:4px;width:4px;height:14px}.brand .cross::after{left:4px;top:9px;width:14px;height:4px}
+.calm{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:.9rem}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--teal-soft);color:var(--teal);font-weight:700;font-size:.85rem;white-space:nowrap}
+.pill.sun{background:var(--sun-soft);color:var(--ink)}
+.tabs{border-bottom:1px solid var(--line);background:var(--card)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:6px}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:8px 12px;border-radius:10px;white-space:nowrap;font-weight:700;color:var(--muted);font-size:.92rem}
+.tab[aria-current="true"]{background:var(--teal);color:var(--card)}
+.tab:hover:not([aria-current="true"]){background:var(--teal-soft);color:var(--teal)}
+main{padding-block:24px 64px}
+section.view{display:flex;flex-direction:column;gap:20px}
+
+/* wristband hero */
+.hero{display:grid;gap:18px}
+.band{display:flex;align-items:stretch;border-radius:999px;background:var(--card);border:1px solid var(--line);overflow:hidden;box-shadow:0 6px 24px -14px rgba(14,60,60,.4);max-width:100%}
+.band .allergy{background:var(--coral);color:#fff;font-family:var(--mono);font-weight:700;font-size:.72rem;letter-spacing:.08em;writing-mode:vertical-rl;transform:rotate(180deg);padding:10px 8px;text-align:center}
+.band .id{padding:12px 18px;display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.band .name{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,5vw,2.4rem);letter-spacing:-.01em}
+.band .meta{font-family:var(--mono);font-size:.8rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+.band .barcode{width:90px;flex:none;margin:12px 18px 12px 0;border-radius:6px;
+  background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px)}
+@media (max-width:520px){.band{border-radius:22px}.band .barcode{display:none}}
+.lede{font-size:1.08rem;max-width:62ch}
+
+/* ward map */
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.room{position:relative;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:14px 14px 12px;display:flex;flex-direction:column;gap:6px;transition:transform .15s,border-color .15s}
+.room:hover{transform:translateY(-2px);border-color:var(--teal)}
+.room .no{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+.room .t{font-family:var(--display);font-weight:700;font-size:1.08rem}
+.room .d{font-size:.88rem;color:var(--muted)}
+.room .prog{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:4px}
+.room .prog i{display:block;height:100%;background:var(--teal);border-radius:6px}
+.room.done{border-color:var(--ok)}
+.room.done .no::after{content:"  ✓ visited";color:var(--ok);font-weight:700}
+.part-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:8px}
+.part-head .label{color:var(--teal)}
+
+/* game panel */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3vw,28px);display:flex;flex-direction:column;gap:16px}
+.scene{display:flex;gap:12px;align-items:flex-start;background:var(--teal-soft);border-radius:12px;padding:12px 14px}
+.scene .who{flex:none;width:34px;height:34px;border-radius:50%;background:var(--teal);color:var(--card);display:grid;place-items:center;font-family:var(--display);font-weight:800}
+.qmeta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.dots{display:flex;gap:4px;flex-wrap:wrap}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--teal)}.dots i.re{background:var(--sun)}
+.q{font-family:var(--display);font-size:clamp(1.15rem,2.6vw,1.4rem);font-weight:700;line-height:1.3}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;border:2px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--teal)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:8px;background:var(--paper);display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:.8rem}
+.opt.no{border-color:var(--sun);background:var(--sun-soft);text-decoration:line-through;text-decoration-color:var(--muted);opacity:.75}
+.opt.yes{border-color:var(--ok);background:var(--ok-soft)}
+.opt:disabled{cursor:default}
+.why{border-left:4px solid var(--ok);background:var(--ok-soft);border-radius:0 12px 12px 0;padding:12px 14px}
+.why.soft{border-color:var(--sun);background:var(--sun-soft)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:12px;padding:11px 18px;font-weight:700;background:var(--teal);color:var(--card)}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.small{padding:7px 12px;font-size:.88rem}
+.btn:disabled{opacity:.45;cursor:default}
+.cheer{font-family:var(--display);font-size:1.6rem;font-weight:800}
+
+/* order puzzles */
+.slots{display:grid;gap:8px;counter-reset:s}
+.slot{border:2px dashed var(--line);border-radius:12px;padding:10px 12px;min-height:46px;display:flex;gap:10px;align-items:center;counter-increment:s}
+.slot::before{content:counter(s);font-family:var(--mono);font-weight:700;color:var(--muted);width:22px;flex:none}
+.slot.filled{border-style:solid;border-color:var(--ok);background:var(--ok-soft)}
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:9px 12px;text-align:left;font-size:.95rem;max-width:100%}
+.chip:hover{border-color:var(--teal)}
+.chip.nudge{border-color:var(--sun);background:var(--sun-soft)}
+.chip.hint{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-soft)}
+.chip.sel{border-color:var(--teal);background:var(--teal-soft)}
+.chip.good{border-color:var(--ok);background:var(--ok-soft)}
+.chip.miss{border-color:var(--sun);background:var(--sun-soft)}
+.chip.bad{border-color:var(--coral);background:var(--coral-soft);text-decoration:line-through}
+@keyframes wob{0%,100%{transform:none}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
+.wob{animation:wob .3s}
+.picker{display:flex;flex-wrap:wrap;gap:8px}
+
+/* flashcards */
+.fc-wrap{perspective:1200px}
+.fc{position:relative;width:100%;min-height:230px;border:0;background:none;padding:0;transform-style:preserve-3d;transition:transform .45s}
+.fc.flip{transform:rotateY(180deg)}
+.fc .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center;border:1px solid var(--line)}
+.fc .front{background:var(--card)}
+.fc .front b{font-family:var(--display);font-size:clamp(1.6rem,5vw,2.4rem)}
+.fc .back{background:var(--teal-soft);transform:rotateY(180deg);font-size:1.05rem}
+
+/* vitals */
+.vital{display:flex;flex-direction:column;align-items:center;gap:4px;padding:22px;border-radius:16px;background:var(--paper);border:1px solid var(--line)}
+.vital .v{font-family:var(--mono);font-weight:700;font-size:clamp(2rem,7vw,3rem)}
+.zone{display:flex;height:12px;border-radius:6px;overflow:hidden;width:100%;max-width:420px}
+.zone i{flex:1}
+
+/* tools */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}
+.tool{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.tool label{display:flex;flex-direction:column;gap:4px;font-size:.9rem;font-weight:700}
+.tool select,.tool input[type=number],.namebox input{font:inherit;font-weight:400;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);width:100%;max-width:100%}
+.tool .check{flex-direction:row;align-items:flex-start;gap:8px;font-weight:400}
+.result{border-radius:12px;padding:10px 12px;background:var(--teal-soft);font-weight:700}
+.result .mono{font-size:1.4rem}
+
+/* checklist */
+.ck{display:grid;gap:6px}
+.ck label{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border-radius:10px;background:var(--card);border:1px solid var(--line)}
+.ck label.on{background:var(--ok-soft);border-color:var(--ok)}
+.ck input{margin-top:4px;accent-color:var(--teal);width:18px;height:18px;flex:none}
+.ck .n{font-family:var(--mono);font-weight:700;color:var(--teal);flex:none;min-width:3.4em}
+.ck h3{margin-top:12px}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok)}
+
+/* reference file */
+details.ch{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+details.ch>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;gap:10px;align-items:center;font-family:var(--display);font-weight:700;font-size:1.08rem}
+details.ch>summary::-webkit-details-marker{display:none}
+details.ch>summary::after{content:"+";margin-left:auto;font-family:var(--mono);color:var(--teal);font-size:1.2rem}
+details.ch[open]>summary::after{content:"–"}
+details.ch>summary .tag{font-family:var(--mono);font-size:.7rem;padding:2px 7px;border-radius:6px;background:var(--teal-soft);color:var(--teal);letter-spacing:.06em}
+.chb{padding:0 16px 18px;display:flex;flex-direction:column;gap:12px;max-width:78ch}
+.chb ul,.chb ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+.say{background:var(--lav-soft);border-left:4px solid var(--lav);border-radius:0 10px 10px 0;padding:10px 12px;font-style:italic}
+.note{background:var(--sun-soft);border-radius:10px;padding:10px 12px;font-size:.95rem}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:8px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+tr:last-child td{border-bottom:0}
+td.v{font-family:var(--mono);white-space:nowrap}
+.clues{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.clue{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:92px}
+.clue b{font-family:var(--display)}
+.clue .a{display:none;font-size:.9rem;color:var(--ink)}
+.clue.open{background:var(--teal-soft);border-color:var(--teal)}
+.clue.open .a{display:block}
+.clue .tap{font-size:.78rem;color:var(--muted)}
+.clue.open .tap{display:none}
+.namebox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.namebox input{max-width:240px}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:12px;font-weight:700;opacity:0;transition:.25s;pointer-events:none;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.extra{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.extra b{font-family:var(--display)}
+.extra span{font-size:.86rem;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <button class="brand" data-go="home"><span class="cross" aria-hidden="true"></span>Mr. Ivan's Shift</button>
+    <div class="calm">
+      <span class="pill" id="learnedPill">0 things learned</span>
+      <span class="pill sun" id="rankPill">First-day student</span>
+    </div>
+  </div>
+</header>
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" id="tabs">
+    <button class="tab" data-go="home">Ward map</button>
+    <button class="tab" data-go="play">Story</button>
+    <button class="tab" data-go="order">Order puzzles</button>
+    <button class="tab" data-go="cards">Flashcards</button>
+    <button class="tab" data-go="pack">Transfer pack</button>
+    <button class="tab" data-go="vitals">Vitals check</button>
+    <button class="tab" data-go="tools">Scoring tools</button>
+    <button class="tab" data-go="check">OSCA checklist</button>
+    <button class="tab" data-go="file">Ivan's file</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- HOME -->
+<section class="view" id="v-home">
+  <div class="hero">
+    <div class="band" aria-label="Patient wristband">
+      <div class="allergy">ALLERGY? ASK</div>
+      <div class="id">
+        <span class="label">Resident · Aged care admission · OSCA Task 4</span>
+        <span class="name">JONES, Ivan</span>
+        <span class="meta"><span>82+ yrs</span><span>DOB: ask him</span><span>URN: ask him</span><span>NOK: Colleen (daughter)</span><span>L hemiparesis · falls risk</span></span>
+      </div>
+      <div class="barcode" aria-hidden="true"></div>
+    </div>
+    <p class="lede">Walk through Mr. Ivan's whole stay, from admission to his transfer to be with his wife. Each room is a short scene with questions. <b>You can't lose here.</b> A wrong pick just gets crossed out so you can try again, and the "why" shows every time. Anything you missed comes back once at the end, so it sticks.</p>
+  </div>
+
+  <div class="part-head"><span class="label">Part 1</span><h2>Admission &amp; assessments</h2></div>
+  <div class="map" id="map1"></div>
+  <div class="part-head"><span class="label">Part 2</span><h2>ADL &amp; care plan</h2></div>
+  <div class="map" id="map2"></div>
+  <div class="part-head"><span class="label">Part 3</span><h2>Discharge (transfer)</h2></div>
+  <div class="map" id="map3"></div>
+
+  <div class="part-head"><span class="label">Side rooms</span><h2>Mini games</h2></div>
+  <div class="extras">
+    <button class="extra" data-go="order"><b>Order puzzles</b><span>Tap the steps in order: your script, hand rub, urinalysis, shower, ISBAR…</span></button>
+    <button class="extra" data-go="cards"><b>Flashcards</b><span>Flip through abbreviations and tools. "Again" puts the card back in the pile.</span></button>
+    <button class="extra" data-go="pack"><b>Pack the transfer bag</b><span>Choose what goes in Ivan's transfer pack, and what doesn't.</span></button>
+    <button class="extra" data-go="vitals"><b>Vitals check</b><span>Normal or flag it? Untimed, at your own pace.</span></button>
+    <button class="extra" data-go="tools"><b>Scoring tools</b><span>Practise GCS, 4AT, MST, FRAT and BMI.</span></button>
+    <button class="extra" data-go="file"><b>Ivan's file</b><span>All the notes in one place, whenever you want to read.</span></button>
+  </div>
+</section>
+
+<!-- STORY PLAY -->
+<section class="view" id="v-play" hidden>
+  <div class="panel" id="play"></div>
+</section>
+
+<!-- ORDER -->
+<section class="view" id="v-order" hidden>
+  <div><span class="label">Side room</span><h2>Order puzzles</h2></div>
+  <p class="muted">Tap the steps in the right order. A wrong tap just wiggles. After two wiggles the next step glows to help you.</p>
+  <div class="picker" id="orderPicker"></div>
+  <div class="panel" id="orderPanel"></div>
+</section>
+
+<!-- CARDS -->
+<section class="view" id="v-cards" hidden>
+  <div><span class="label">Side room</span><h2>Flashcards</h2></div>
+  <div class="picker" id="cardPicker"></div>
+  <div class="panel" id="cardPanel"></div>
+</section>
+
+<!-- PACK -->
+<section class="view" id="v-pack" hidden>
+  <div><span class="label">Part 3 mini game</span><h2>Pack Ivan's transfer bag</h2></div>
+  <p class="muted">You (EN) make <b>copies</b> of these documents for the transfer pack that goes with Mr. Ivan. Tap everything that belongs, then seal the pack.</p>
+  <div class="panel" id="packPanel"></div>
+</section>
+
+<!-- VITALS -->
+<section class="view" id="v-vitals" hidden>
+  <div><span class="label">Side room</span><h2>Vitals check</h2></div>
+  <p class="muted">The assessor gives you a reading. Is it in the normal range, or do you flag it to the RN? There's no clock.</p>
+  <div class="panel" id="vitPanel"></div>
+</section>
+
+<!-- TOOLS -->
+<section class="view" id="v-tools" hidden>
+  <div><span class="label">Side room</span><h2>Scoring tools</h2></div>
+  <p class="muted">These match the options on the Clinsoft documentation form. Change the answers and watch the score update.</p>
+  <div class="tools" id="tools"></div>
+</section>
+
+<!-- CHECKLIST -->
+<section class="view" id="v-check" hidden>
+  <div><span class="label">Trainer observation 4.1 – 4.42</span><h2>OSCA checklist</h2></div>
+  <p class="muted">This is what the assessor marks Satisfactory or Not Satisfactory. Tick each one off when you've practised it. Ticks stay on this device.</p>
+  <div class="bar"><i id="ckBar" style="width:0%"></i></div>
+  <div class="row"><span id="ckCount" class="mono">0 / 0</span><button class="btn ghost small" id="ckReset">Clear ticks</button></div>
+  <div class="ck" id="ck"></div>
+</section>
+
+<!-- FILE -->
+<section class="view" id="v-file" hidden>
+  <div><span class="label">Reference</span><h2>Ivan's file</h2></div>
+  <p class="muted">Everything from the Task 4 document and your handwritten script & flow. Open any chapter.</p>
+
+  <details class="ch" open><summary><span class="tag">CASE</span>Mr. Ivan at a glance</summary><div class="chb">
+    <div class="tw"><table>
+      <tr><th>Item</th><th>Details</th></tr>
+      <tr><td>Who</td><td>Mr. Ivan Jones, 82+ yrs. Admitted this morning to your aged care facility from his <b>independent living setting</b>.</td></tr>
+      <tr><td>History</td><td>Hypertension · Diabetes · Myocardial infarction (MI) · Stroke 2 yrs ago → <b>left-sided hemiparesis</b> · <b>3 falls last month</b> with mild–moderate musculoligamentous injuries and bruises</td></tr>
+      <tr><td>BP</td><td>Meds + diet; maintained around <span class="mono">130/90 mmHg</span></td></tr>
+      <tr><td>Diabetes</td><td>Oral medicines + diet control. He took all his medicines himself.</td></tr>
+      <tr><td>Why he moved</td><td>More falls at home + risk in self-medicating</td></tr>
+      <tr><td>Family</td><td>Daughter <b>Ms. Colleen Jones</b> (helped with hygiene, shopping, chores). Wife <b>Mrs. Mavis Jones</b> (Part 3).</td></tr>
+      <tr><td>On admission</td><td>Anxious, pleasantly confused but answering appropriately. Lean, tall, properly dressed.</td></tr>
+      <tr><td>Mobility</td><td>Zimmer frame at home (daughter helps); wheelchair outdoors</td></tr>
+      <tr><td>Senses</td><td>Partial hearing impairment, <b>hearing aid in left ear</b>; reading glasses</td></tr>
+      <tr><td>Mouth &amp; diet</td><td>Upper partial dentures in situ; <b>diabetic diet, texture modified to soft</b></td></tr>
+      <tr><td>Lifestyle</td><td>Current smoker, <span class="mono">4 cigarettes/day</span>. Wants to quit but needs support.</td></tr>
+      <tr><td>Skin</td><td>Very frail, dry, paper-like → <b>high risk for falls and skin tears</b>. Vital signs stable.</td></tr>
+      <tr><td>Wound</td><td>Chronic diabetic wound <b>right leg</b>, dressing <b>every 3rd day</b></td></tr>
+      <tr><td>GP</td><td>Reviews wound, BGL and hypertension <b>monthly</b></td></tr>
+      <tr><td>Facility policy</td><td>NCP, doctor's review and medication chart are finalised <b>over a week</b>. Info gathered is discussed with the RN, who develops the NCP with the resident, family and healthcare team.</td></tr>
+    </table></div>
+    <h3>Clue board: tap a clue to see what it means for your care</h3>
+    <div class="clues" id="clues"></div>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">TASK</span>What you must demonstrate</summary><div class="chb">
+    <p><b>Sequence:</b> Part 1 Admission (Assessment, NCP) → Part 2 ADL assessment &amp; performing ADL → Part 3 Discharge (Transfer).</p>
+    <h3>Part 1</h3>
+    <ol>
+      <li>Help Ivan get settled in his room.</li>
+      <li>Communicate with Ivan and Colleen and attend to the psychosocial needs of the transition.</li>
+      <li>Explain to Ivan the implications of admission to the facility (he asks if he really needs to be there).</li>
+      <li>Give information on community services to help him quit smoking.</li>
+      <li>Complete the nursing assessments and document them in the right charts and tools.</li>
+    </ol>
+    <p><b>The 11 assessments:</b> (1) vital signs with <b>manual</b> BP, pulse, RR, (2) head-to-toe, (3) neurological obs, (4) neurovascular obs, (5) falls risk, (6) pressure injury risk, (7) malnutrition screening tool, (8) mobility, (9) oral health, (10) BGL, (11) urinalysis. Some may use manikins, or you may assess your buddy.</p>
+    <h3>Part 2</h3>
+    <p>Ivan decides to stay. He asks for a shower before lunch. Colleen says he needs help with showering and grooming. You notice he is <b>limping on the L side</b>. During the shower and mouth care: skin fragile, dry and paper-like; <b>bleeding gums and white round spots on the buccal wall</b>; he finds it hard to open his bowels and passes only a few <b>pebbles of faeces</b>.</p>
+    <ol>
+      <li>Mobility assessment, then assist (x1) transfer to a shower chair, personal hygiene (showering, toileting) and grooming (hair, nails, mouth care), and get him ready for the meal.</li>
+      <li>Educate about the risk of <b>falls, bleeding, skin tears and constipation</b>.</li>
+      <li>Formulate the NCP from Part 1 &amp; 2 findings, involving Ivan and his daughter.</li>
+    </ol>
+    <h3>Part 3</h3>
+    <p>His wife Mrs. Mavis Jones had a stroke with hemiparesis and has a place in another aged care facility. Ivan wants to be with her, so he is transferred there (family inclusivity and personal preference). The RN asks you to start the discharge (transfer).</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">SCRIPT</span>Your opening script &amp; flow</summary><div class="chb">
+    <div class="namebox"><label for="nurseName" class="label">Your name for the script</label><input id="nurseName" placeholder="Type your name"></div>
+    <ol>
+      <li><b>Hand wash!</b> (ABHR, 20–30 seconds)</li>
+      <li><b>Introduce yourself.</b><div class="say">"Hello, good afternoon! My name is <span class="nn">[your name]</span> and I will be your nurse today."</div></li>
+      <li><b>Ask the patient's name and DOB.</b><div class="say">"May I please know your name? … And your date of birth please?"</div></li>
+      <li><b>Ask if they know their URN/Medicare number, and ask about allergies.</b><div class="say">"Okay Mr. Ivan, do you know your URN or Medicare number? … And do you have any allergies?"</div></li>
+      <li><b>Safety check the room.</b> Oxygen, suction and call bell working? Bed brakes on? Railings not stuck? No trip hazards?</li>
+      <li><b>Explain the procedure and gain consent.</b><div class="say">"Okay Mr. Ivan, I'll do some necessary assessments to give you the appropriate care that you'll need. I'll explain the process as I go and some may require me to touch you. Is that okay with you? … Just tell me if you get uncomfortable or something is hurting so I can immediately stop. Is that alright, Mr. Ivan?"</div></li>
+      <li><b>Perform the A to E assessment.</b></li>
+      <li><b>Head-to-toe assessment.</b></li>
+    </ol>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">ABCDE</span>Primary assessment</summary><div class="chb">
+    <h3>A: Airway</h3>
+    <ul><li>Observe how he is breathing and whether anything is obstructing the airway. Breathing is normally silent. <b>Audible breathing may mean an obstruction.</b></li>
+    <li>Checklist 4.7.1: no abnormal sound while the patient is speaking = clear airway.</li>
+    <li class="note">Your note: if something is blocking it, remove the foreign object (your notes say forceps). If the airway is clear, keep it open with the <b>head-tilt–chin-lift</b> method. Call the RN.</li>
+    <li><i>Why?</i> So we know whether the patient is breathing properly.</li>
+    <li>Document: <b>Clear / Obstruction</b></li></ul>
+    <h3>B: Breathing</h3>
+    <ul><li>Count RR for <b>a full minute</b>.</li><li>Check the <b>trachea is midline</b> by running your finger down the neck.</li>
+    <li>Look for accessory muscle use, grunting and abnormal breathing patterns. <span class="note">If present: try repositioning the patient.</span></li>
+    <li>Normal (4.7.2): regular, equal rise and fall of the chest, no shortness of breath, no oxygen therapy, no cyanosis.</li>
+    <li><i>Why?</i> To see if the patient is having difficulty breathing.</li>
+    <li>Document: Normal / Abnormal. If abnormal: SOB, increased WOB, irregular, apnoea.</li></ul>
+    <h3>C: Circulation</h3>
+    <ul><li>Vital signs: temperature, BP (manual), HR, RR, SpO₂. The assessor gives you the values to document.</li>
+    <li>Pulse: <b>regularity, equality, strength</b>. Warmth of all 4 limbs. Capillary refill of fingers and toes. Swelling of the lower extremities.</li>
+    <li>Your notes also put pain and urinalysis here (pain: ask, document, adjust the care).</li></ul>
+    <h3>D: Disability</h3>
+    <ul><li class="note">Your note: this is where you ask if you can do the <b>Neurological Obs Chart</b>.</li>
+    <li>AVPU, GCS, PEARL (pupils), <b>AMT4</b>, BGL. Your notes add limb strength, medications and history.</li></ul>
+    <h3>E: Exposure</h3>
+    <ul><li>Ask about and check for pain, skin tears, rash, swelling, bruising, an IV cannula, or any pre-existing injury. If the patient seems confused, check physically.</li>
+    <li class="note">Ivan has a <b>chronic wound on his right leg</b>. Note it.</li>
+    <li><i>Why?</i> To find out if any treatment is needed.</li>
+    <li>Document: Pain / Pressure sore / Pressure injury / Skin tears / Swelling / Ulcer / Nil exposure</li></ul>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">VITALS</span>Normal values &amp; the "why"</summary><div class="chb">
+    <div class="tw"><table>
+      <tr><th>Check</th><th>Normal</th><th>Why we check</th></tr>
+      <tr><td>Temperature</td><td class="v">36.5–37.2 °C</td><td>Hypothermia / hyperthermia</td></tr>
+      <tr><td>Blood pressure</td><td class="v">90/60–120/80 mmHg</td><td>High / low BP. Ivan usually runs ~130/90. Take it <b>manually</b>.</td></tr>
+      <tr><td>Heart rate / pulse</td><td class="v">60–100 bpm</td><td>Tachycardia (&gt;100) / bradycardia (&lt;60); is it pumping and beating normally?</td></tr>
+      <tr><td>Respiratory rate</td><td class="v">12–20 /min</td><td>Count for a full minute</td></tr>
+      <tr><td>SpO₂</td><td class="v">≥ 94 %</td><td>Is there enough oxygen in the blood?</td></tr>
+      <tr><td>Capillary refill</td><td class="v">≤ 2 s (form: "3 sec" vs "&gt;3 sec")</td><td>The colour should come back quickly; a slow refill means poor perfusion</td></tr>
+      <tr><td>BGL</td><td class="v">4–8 mmol/L</td><td>Hypo / hyperglycaemia. Assessor prompts <b>10.2</b> → high, report to RN</td></tr>
+      <tr><td>GCS</td><td class="v">15 / 15</td><td>Level of consciousness</td></tr>
+      <tr><td>Pupil size</td><td class="v">3–5 mm</td><td>Form scale 1–8 mm, PEARL yes/no</td></tr>
+      <tr><td>Pain</td><td class="v">score /10</td><td>To adjust the care provided</td></tr>
+      <tr><td>Urinalysis</td><td class="v">nitrite &amp; leucocytes negative</td><td>Infection or disease in the urine (assessor prompts a positive UTI)</td></tr>
+    </table></div>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">NEURO</span>Disability tools: AVPU, GCS, PEARL, AMT4, limbs</summary><div class="chb">
+    <p><b>AVPU</b> checks whether they are conscious, or reacting only to voice or pain, or unresponsive. A = Alert · V = responds to Voice · P = responds to Pain only · U = Unconscious/unresponsive.</p>
+    <div class="tw"><table>
+      <tr><th>GCS</th><th>Options on the form</th></tr>
+      <tr><td>Eye (E1–4)</td><td>Spontaneously 4 · To speech 3 · To pain 2 · None 1</td></tr>
+      <tr><td>Verbal (V1–5)</td><td>Oriented 5 · Confused 4 · Inappropriate words 3 · Incomprehensible sounds 2 · None 1</td></tr>
+      <tr><td>Motor (M1–6)</td><td>Obeys commands 6 · Localises to pain 5 · Withdraws 4 · Flexion to pain 3 · Extension to pain 2 · None 1</td></tr>
+    </table></div>
+    <p>Total out of 15, calculated by hand. Normal is 15/15 and the lowest is 3.</p>
+    <p><b>PEARL</b>: Pupils Equal And Reactive to Light (PEARLA adds Accommodation). Shine a <b>pen torch</b> into each eye and check the reaction. Document the size of each eye (1–8 mm; normal 3–5) and PEARL yes/no for each eye.</p>
+    <p><b>AMT4</b>: (1) full name &amp; DOB, which you already asked, (2) age, (3) month &amp; year, (4) name of the place. If he gets any of the 4 wrong, the RN or physician does a further delirium assessment. That isn't part of this task.</p>
+    <p><b>Limb strength</b> (each arm and leg): ask them to pull, push, close and open their hands/arms. Rate on the neuro chart: 5 normal power · 4 active movement against resistance · 3 against gravity · 2 with gravity eliminated · 1 flicker · 0 none. Speech: hoarseness, slurred (dysarthria), stuttering, normal.</p>
+    <p><b>Neurovascular obs (all 4 limbs):</b> extremity, oedema, colour, temperature, capillary refill, sensation, motion, pain score, pulse (radial for the arms, dorsalis pedis for the legs).</p>
+    <p><b>BGL</b>: checks for hypo/hyperglycaemia (normal 4–8). <span class="note">Your note: don't use an alcohol swab. Ask the patient to wash their hands.</span></p>
+    <p>Ask about medications: <i>"What type of medicine do you take, Mr. Jones?"</i> and history: <i>"May I ask for your medical history? And have you had any surgery before?"</i></p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">H2T</span>Head-to-toe (9 systems)</summary><div class="chb">
+    <p class="note"><b>Your head check:</b> hair colour and skin colour match the ethnicity · head size is normal · no abnormal movement or twitching of the face · everything is symmetrical and midline · eyes and ears are at the same level.</p>
+    <div class="tw"><table>
+      <tr><th>System</th><th>Inspect</th><th>Auscultate</th><th>Palpate / other</th></tr>
+      <tr><td>CNS</td><td>Physical trauma</td><td><i>Nothing</i></td><td>Head tenderness, swelling. PEARL, limb power, speech</td></tr>
+      <tr><td>Sensory</td><td>Sight each eye (myopia, hyperopia, cataracts, glaucoma, astigmatism, blind), eyeglasses</td><td>-</td><td>Hearing each ear: cannot hear / louder voice / normal. (Eyes, ears, nose, tongue)</td></tr>
+      <tr><td>Respiratory</td><td>Trauma, airway, breathing, chest expansion symmetrical</td><td>Anterior/posterior: <b>RUL, RML, RLL, LUL, LLL</b>: clear, crackles, wheezes, rhonchi, stridor, pleural rub, diminished</td><td>Chest expansion, pain, tactile fremitus, crepitus (subcutaneous emphysema)</td></tr>
+      <tr><td>CVS</td><td>Clubbing, cyanosis, pallor, diaphoresis, scars, pacemaker, devices (IV cannula, CVC, PICC, portacath)</td><td>Heart sounds: two (S1 &amp; S2); murmur, rub, regurgitation</td><td>Radial &amp; dorsalis pedis pulses (equal, regular, strength), cap refill of hands &amp; feet, limb warmth, swelling</td></tr>
+      <tr><td>GIT</td><td>Hernia, pad, masses, scars, stoma</td><td>Bowel sounds in 4 quadrants (RUQ, RLQ, LUQ, LLQ): normo/hypo/hyperactive, count per min</td><td>Pain or tenderness by quadrant</td></tr>
+      <tr><td>Renal</td><td>Distension, pad, IDC, masses, scars</td><td><i>Nothing</i></td><td>Tenderness R kidney, L kidney, bladder</td></tr>
+      <tr><td>Musculo&shy;skeletal</td><td>Trauma; each limb: amputation, cast, prosthetic</td><td><i>Nothing</i></td><td><i>Nothing to palpate.</i> Weight bearing, transfer assistance (indep/1x–4x), transfer type (hoist, step, standing machine), aids, falls history</td></tr>
+      <tr><td>Integu&shy;mentary</td><td>Skin colour, integrity, texture, hair, nails (Beau's lines, clubbing, koilonychia, onychomycosis, pitting)</td><td><i>Nothing</i></td><td><i>Nothing to palpate</i></td></tr>
+      <tr><td>Endocrine</td><td>Unexplained weight loss, thyroid/neck (goitre), face (bulging eyes, moon face, puffy)</td><td><i>Nothing</i></td><td><i>Nothing to palpate.</i> T1DM/T2DM, T2DM type, previous hypo episode</td></tr>
+    </table></div>
+    <p class="muted">Ivan, likely findings: reduced power on the L side, reading glasses, hearing aid L ear, dry fragile skin with bruises and the R leg wound, T2DM on oral tablets, uses a Zimmer frame and wheelchair, falls in the past 2 months.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">TESTS</span>Urinalysis, BGL, BMI, histories, vaccines</summary><div class="chb">
+    <h3>Urinalysis (12 steps, 4.16)</h3>
+    <ol>
+      <li>Gather equipment: urinalysis kit, non-sterile gloves, paper towel, sample urine container, 3 ml syringe</li>
+      <li>Hand hygiene with ABHR, put on gloves</li>
+      <li>Inspect the colour and odour of the sample</li>
+      <li>Check the expiry date of the test strips</li>
+      <li>Draw up the sample with a sterile syringe</li>
+      <li>Place the strip on a paper towel and apply urine from the syringe, covering every pad</li>
+      <li>Remove excess urine from the strip</li>
+      <li>Wait 2 minutes before reading</li>
+      <li>Hold the strip <b>horizontally</b> and compare with the colour chart on the bottle</li>
+      <li>Record the results</li>
+      <li>If there are signs of UTI, <b>don't dispose</b> of the urine. Keep it sterile by closing the lid.</li>
+      <li>Remove gloves, hand hygiene with ABHR</li>
+    </ol>
+    <p>Form fields: specific gravity (1.000–1.030), pH (5–8.5), leucocytes, blood, nitrite, ketones, bilirubin, urobilinogen, protein, glucose. <b>Positive nitrite + leucocytes = possible UTI</b>, which the assessor will prompt.</p>
+    <h3>Other measurements</h3>
+    <ul><li>BGL: assessor prompts <span class="mono">10.2 mmol/L</span> (above 4–8 = hyperglycaemia, report to RN). The form also asks for blood ketones.</li>
+    <li>Height + weight → <b>BMI = weight (kg) ÷ height (m)²</b></li>
+    <li>Vaccinations: influenza (flu), shingles, pneumococcal polysaccharide (23vPPV)</li></ul>
+    <h3>Histories (4.8–4.12)</h3>
+    <ul><li>Allergies: medication, food, other (pollen, bee sting…)</li>
+    <li>Medical history, by system: CNS, CVS, respiratory, GI, renal, MSK, integumentary, endocrine, sensory</li>
+    <li>Surgical history: CVS, respiratory, GI, renal</li>
+    <li>Medication history (use the resident's medication list)</li>
+    <li>Family/relationship: marital status, next of kin, NOK relationship, lifestyle (alcohol, exercise, smoker)</li>
+    <li>Reason for admission (e.g. fall)</li></ul>
+    <p class="muted">Equipment for assessments (4.5): automatic BP machine, stethoscope, pen torch, BGL kit, urinalysis kit, weighing machine, height measuring tape.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">RISK</span>Braden, FRAT, MST, 4AT, skin</summary><div class="chb">
+    <p><b>Pressure injury risk: Braden Scale.</b> Sensory perception, moisture, activity, mobility, nutrition, friction &amp; shear. A <b>lower</b> score means <b>higher</b> risk.</p>
+    <p><b>Falls risk: FRAT.</b> Reasons for assessment: admission, change in condition, change of location, post fall, doctor's order. <b>High risk if ANY:</b> a fall in the past 12 months · unsteady or uses a walking aid · confused or answers any AMT4 question wrong · urinary/faecal frequency, urgency or nocturia · agitation/aggression. Moderate = none of these but may still be at risk. Ivan = <b>HIGH</b>.</p>
+    <p><b>Malnutrition: MST.</b> Lost weight recently without trying? No 0 / Unsure 2 / Yes, how much: 1–3 kg 1 · 4–6 kg 2 · 7–10 kg 3 · &gt;10 kg 4. Eating poorly because of decreased appetite? No 0 / Yes 1. <b>Total ≥ 2 = at risk.</b></p>
+    <p><b>Delirium: 4AT.</b> Alertness (normal 0, clearly abnormal 4) · AMT4 (0 mistakes 0 / 1 mistake 1 / 2+ 2) · Attention: months backwards from December (7+ correct 0 / starts but &lt;7 1 / untestable 2) · Acute change or fluctuating course (no 0 / yes 4). <b>≥4 possible delirium</b> · 1–3 possible cognitive impairment · 0 unlikely.</p>
+    <p><b>Comprehensive skin assessment:</b> temperature, moisture (dry), turgor (normal &lt;3 s), integrity (fragile, wound…), wound locations, skin colour taking ethnicity into account, altered sensation, medical devices. Actions: skin protection strategies, pressure redistribution surface, wound assessment, education. Referrals: allied health, stomal therapy nurse, wound care nurse/CNS, doctor.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">TALK</span>Part 1 talking points</summary><div class="chb">
+    <h3>Settling Ivan in (4.3–4.4)</h3>
+    <ul><li>Carry his bags, support him with his Zimmer frame, and give him time to walk to his room comfortably.</li>
+    <li>Orientate him to the room: call bell, bathroom, lights, bed controls, wardrobe, meal times, dining room. Put the call bell and frame within reach.</li>
+    <li>Make sure his hearing aid (L ear) and reading glasses are on and working.</li>
+    <li>Encourage personal items such as photos. Introduce him to staff.</li></ul>
+    <h3>Communication &amp; psychosocial needs</h3>
+    <ul><li>He's anxious and a little confused. Speak calmly, face him, cut out noise, use short clear sentences, check he understood, and give him time.</li>
+    <li>Acknowledge his feelings about leaving home. Involve Colleen, and answer her worries about his falls and health honestly.</li>
+    <li>Offer choices and respect his decisions; it is his home now.</li></ul>
+    <h3>Implications of admission (when he asks "Do I have to be here?")</h3>
+    <ul><li>24-hour nursing care and supervision. Help is there right away if he falls.</li>
+    <li>Nurses manage his medicines, so the risk from self-medicating is gone.</li>
+    <li>Regular GP review of his wound, BGL and BP; access to physio, podiatrist and diabetes educator.</li>
+    <li>Meals, help with hygiene, and social activities. Family can visit.</li>
+    <li>He keeps his rights and choices. Discuss his concerns with the RN and Colleen.</li></ul>
+    <h3>Quitting smoking: community support</h3>
+    <ul><li><b>Quitline 13 7848</b>: free phone counselling and call-back support</li>
+    <li>His GP: nicotine replacement therapy (patches, gum, lozenges) or prescription medicine</li>
+    <li>Pharmacist advice; the My QuitBuddy app</li>
+    <li>Tell the RN so it goes into his care plan. Encourage him; quitting helps his BP, heart, wound healing and diabetes.</li></ul>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">NCP</span>Nursing care plan</summary><div class="chb">
+    <p><b>4.23 plans:</b> (1) pressure injury prevention, (2) falls prevention, (3) malnutrition prevention, (4) mobility/transfer, (5) wound care (as per RN). Then <b>4.24</b>: discuss with the resident, family and carers, and confirm they accept it. <b>4.28</b>: update the care plan. <b>4.29</b>: referrals to physiotherapist, podiatrist and diabetes educator.</p>
+    <div class="tw"><table>
+      <tr><th>NCP section</th><th>What you fill in</th><th>Ivan</th></tr>
+      <tr><td>General (AM)</td><td>NFR (Not For Resuscitation) doc sighted? Frequency of vitals, neuro, pain, neurovascular and BGL-ketone obs. Type of food (FWD, minced, pureed, soft), fluids (IDDSI Level 0–4), meal assistance, FBC, fluid restriction, daily weight, meds crushed/whole</td><td>Soft diabetic diet, BGL monitoring</td></tr>
+      <tr><td>Malnutrition</td><td>Food chart AM / PM / ND</td><td>Use the MST score</td></tr>
+      <tr><td>Pressure injury</td><td>Repositioning assistance (indep, 1x, 2x, 4x), frequency (1 or 2 hourly), PI assessment frequency</td><td>Frail skin, high risk</td></tr>
+      <tr><td>Wound</td><td>Wound chart, dressing frequency, drain chart</td><td>Wound chart yes, <b>every 3rd day</b></td></tr>
+      <tr><td>Falls</td><td>Monitoring (continuous, 15/60, 30/60, 1/24), FRAT frequency</td><td>HIGH falls risk</td></tr>
+      <tr><td>Mobility/transfer</td><td>On/off bed (indep, 1x/2x/4x assist with slide sheet), transfer type, aids, assessment frequency, physio review</td><td>Zimmer frame, wheelchair, 1x assist</td></tr>
+      <tr><td>Discussion</td><td>Discussed with resident and NOK, consent obtained</td><td>Ivan + Colleen</td></tr>
+    </table></div>
+    <p>PM and ND shifts: "continue same as AM shift without changes" or "with changes" (write the changes).</p>
+    <p class="muted">Frequencies: Daily · BD (twice a day) · TDS (three times) · QID (four times) · 4-hourly · 2-hourly · 1-hourly · half-hourly · every 15 min · PRN (as needed). 15/60 = every 15 min, 30/60 = every 30 min, 1/24 = hourly.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">ADL</span>Part 2: shower time</summary><div class="chb">
+    <ul><li><b>4.25</b> Introduce yourself, explain, gain consent for the ADL.</li>
+    <li><b>4.26</b> Safe manual handling: sit to stand, mobilising with the walking aid, assisting with ADLs. <span class="muted">With L hemiparesis: stand on his <b>weaker (left)</b> side; dress the weak side first and undress the strong side first.</span></li>
+    <li><b>Toileting:</b> gain consent to undress → undress → allow time to finish.</li>
+    <li><b>Showering:</b> adjust water temperature → ensure privacy → gain consent → take off clothes → encourage self-showering → self-drying → self-dressing → self-grooming (each with help as needed).</li>
+    <li><b>Oral care:</b> inspect the gums for bleeding before brushing → encourage self-care → check for bleeding after brushing.</li>
+    <li><b>Foot care:</b> inspect the toes and feet for ulcers or broken skin; encourage self-care.</li></ul>
+    <div class="tw"><table>
+      <tr><th>Finding</th><th>What it suggests</th><th>Your action / education</th></tr>
+      <tr><td>Limping on L side</td><td>Left hemiparesis → falls risk</td><td>Assist x1, Zimmer frame, non-slip footwear, call bell, ask for help</td></tr>
+      <tr><td>Fragile, dry, paper-like skin</td><td>Skin tear risk</td><td>Gentle handling, slide sheet (never drag), moisturise, padded rails, long sleeves</td></tr>
+      <tr><td>Bleeding gums, white round spots on buccal wall</td><td>Gum problems / possible oral thrush; bleeding risk</td><td>Soft toothbrush, denture care, document in oral cavity assessment, report to RN</td></tr>
+      <tr><td>Few "pebbles" of faeces</td><td>Constipation (Bristol Type 1)</td><td>Fluids and fibre, mobility, bowel chart, report to RN</td></tr>
+    </table></div>
+    <p>ADL levels on the form: Independent · Independent with mild assistance · Independent with moderate assistance · Dependent (toileting, mobility, showering, grooming, oral care). Also: skin assessment, faecal (Bristol 1–7), continence, oral cavity, toes; referrals for physio, podiatrist, diabetes educator; progress note.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">D/C</span>Part 3: discharge (transfer)</summary><div class="chb">
+    <h3>Steps during the assessment</h3>
+    <ol><li>Check clearance from the treating physician or GP (4.30)</li>
+    <li>Check readiness: consent, vital signs, nursing assessment, family and carer preferences</li>
+    <li>Inform Ivan and his NOK/family; consult their preferences, e.g. transport and documents (4.31–4.32)</li>
+    <li>Collect discharge data: date, time, destination; contact the relevant person; arrange safe transport (4.33)</li>
+    <li>Pre-discharge vitals: T, BP, HR, RR, SpO₂ (4.34)</li>
+    <li>Organise community services and referral letters, e.g. blood test, podiatrist, social worker (4.35)</li>
+    <li>Arrange transport (4.36) and complete the documentation</li>
+    <li>ISBAR handover to the receiving facility with the MDT (4.37). The assessor plays the receiving RN.</li></ol>
+    <p><b>Also cover:</b> hindrances to discharge and how you address them, pharmacy, discharge education, communication and handovers, transport, financial requirements, and discharge documentation.</p>
+    <h3>Transfer pack (copies)</h3>
+    <ol><li>Doctor's notes (the physician agrees to the transfer)</li><li>COVID-19 test result</li><li>Recent blood test results</li><li>Recent scan results</li><li>Medication charts</li>
+    <li>Nursing care charts: BGL chart, Fluid Balance Chart, Bowel chart, Behavioural Assessment Form (BAF), Wound chart</li><li>Nursing Care Plans (NCP)</li><li>Legal documents: Advance Care Directive (ACD), Power of Attorney</li><li>Referral letters (if any)</li></ol>
+    <p><b>ISBAR</b> = Identify · Situation · Background · Assessment · Recommendation.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">ALWAYS</span>Throughout &amp; documentation</summary><div class="chb">
+    <ul><li><b>4.38</b> Privacy and dignity: close the curtains and doors.</li>
+    <li><b>4.39</b> Cultural safety: polite language, soft tone, offering choices, no disrespectful comments.</li>
+    <li><b>4.40</b> Communication: remove distractions (e.g. noise), keep eye contact, don't interrupt, use an appropriate pitch and volume, open posture (no folded arms), appropriate gestures.</li>
+    <li><b>4.41</b> Link theory to practice: all assessments, NCP, NCP updates, communication strategies, cultural safety.</li>
+    <li><b>4.42</b> Work as a team, e.g. with the RN.</li></ul>
+    <p><b>Assessor flow:</b> come prepared → the assessor asks theory questions → you follow the sequence step by step → the assessor marks you → then you do the documentation. Complete the forms online in <b>Clinsoft</b> and in the lab, get charts (e.g. the obs chart, both pages) <b>signed by the assessor</b> before you scan and upload them, and finish the documentation before you leave campus.</p>
+  </div></details>
+
+  <details class="ch"><summary><span class="tag">FIX</span>Small fix-ups to your handwritten notes</summary><div class="chb">
+    <ul><li>BP line stops at "90/60 mmHg &amp;". Finish it as <b>90/60 to 120/80</b>.</li>
+    <li>RR isn't in your notes: <b>12–20 per minute</b>, counted for a full minute.</li>
+    <li>Disability: the OSCA document also wants <b>AMT4</b> (name &amp; DOB, age, month &amp; year, place).</li>
+    <li>The document says <b>PEARL</b>; your PEARLA is fine (it just adds accommodation).</li>
+    <li>Capillary refill: your notes say 0–2 s. The Clinsoft form only has "3 sec" or "&gt;3 sec", so tick "3 sec" when it's normal.</li>
+    <li>Exposure: also check bruising, swelling and any IV cannula.</li>
+    <li>Urinalysis: say what you're looking for, which is <b>positive nitrite and leucocytes = possible UTI</b>.</li></ul>
+  </div></details>
+</section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const store={get(k,d){try{const v=localStorage.getItem("ivan:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("ivan:"+k,JSON.stringify(v))}catch(e){}}};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(t){const el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),1800)}
+
+/* ---------- learned counter (no penalties, only growth) ---------- */
+const RANKS=[[0,"First-day student"],[25,"Buddy nurse"],[70,"Confident student"],[140,"Ready-for-OSCA EN"],[230,"Shift leader"]];
+let learned=store.get("learned",0);
+function addLearn(n){learned+=n;store.set("learned",learned);paintLearn()}
+function paintLearn(){$("#learnedPill").textContent=learned+" things learned";let r=RANKS[0][1];RANKS.forEach(x=>{if(learned>=x[0])r=x[1]});$("#rankPill").textContent=r}
+
+/* ---------- question bank: [chapter, question, [correct, ...wrong], why] ---------- */
+const Q=[
+// Chapter: arrive (Ivan + opening + safety)
+["arrive","Where is Mr. Ivan being admitted from?",["His independent living setting","A hospital ward","His daughter's house","A respite centre"],"He arrived this morning from his independent living setting to your aged care facility."],
+["arrive","Why was Ivan advised to move into residential care?",["More falls at home and risk with self-medicating","His wound became infected","His daughter is moving overseas","He was diagnosed with dementia"],"Three falls last month plus the risk of managing his own medicines led to the move."],
+["arrive","What's the very first thing you do before touching Ivan?",["Hand hygiene (hand wash/ABHR)","Introduce yourself","Ask his date of birth","Check his airway"],"Your script starts with: 1. Hand wash! The checklist marks hand hygiene before touching the patient (4.2 & 4.6)."],
+["arrive","How long should a hand rub with ABHR take?",["20–30 seconds","5–10 seconds","1–2 minutes","Until your hands feel dry, about 3 seconds"],"Checklist 4.2: the whole ABHR procedure takes 20–30 seconds, following the 7 rubbing steps."],
+["arrive","How do you identify Ivan?",["Ask his full name and date of birth, then URN/Medicare","Read the name on the door","Ask Colleen who he is","Check the bed number"],"Ask the patient directly: \"May I please know your name? And your DOB please?\", then URN or Medicare number."],
+["arrive","Straight after identifying him, what else do you ask?",["Does he have any allergies?","What he'd like for lunch","How he got here","His favourite TV show"],"Script step 4: URN/Medicare number AND allergies. Allergies go under medication, food and other."],
+["arrive","Which one is NOT part of your room safety check?",["Opening the window for fresh air","Oxygen and suction working","Call bell working","Bed brakes on and no trip hazards"],"Safety check: oxygen, suction and call bell working; bed brakes on; railings not stuck; no trip hazards."],
+["arrive","Why do you explain the procedure and gain consent first?",["Some checks involve touching him, and he can ask you to stop","It's only needed for surgery","So the assessor can start the timer","Consent is only needed from Colleen"],"\"Some may require me to touch you. Is that okay with you? Just tell me if you get uncomfortable… so I can immediately stop.\""],
+["arrive","How should you help Ivan get to his room (4.3)?",["Carry his bags, support him with his Zimmer frame, let him walk at his own pace","Put him in a wheelchair and wheel quickly","Let Colleen do it all","Ask him to wait until the shift changes"],"Checklist 4.3: help carry bags, support use of the Zimmer frame, allow time to walk comfortably. Then orientate him to the room (4.4)."],
+["arrive","Ivan has partial hearing loss. What helps most when you talk to him?",["Check his left-ear hearing aid is in and working, face him, cut background noise","Shout from the doorway","Talk only to Colleen","Speak fast so it's over quickly"],"He wears a hearing aid in his LEFT ear. Face him, speak clearly, remove distractions (4.40)."],
+["arrive","Ivan asks \"Do I really need to be here?\" What's a good point to explain?",["Nurses will manage his medicines and help 24/7, which lowers his fall and medication risks","He has no choice at all","He'll be here for exactly one week","He can never see his family again"],"Explain the implications: 24-hour care, safer medication management, falls support, GP reviews, and he keeps his rights and choices."],
+["arrive","Ivan wants to quit smoking (4/day). Which community service do you share?",["Quitline (13 7848), plus his GP for nicotine replacement","A gym membership","The local library","A hearing clinic"],"Quitline offers free support. His GP or pharmacist can help with nicotine replacement therapy. Let the RN know for the care plan."],
+// Chapter: abcde
+["abcde","What does the D in ABCDE stand for?",["Disability","Diagnosis","Dressing","Diet"],"Airway, Breathing, Circulation, Disability, Exposure."],
+["abcde","Ivan chats normally with you. What does this tell you about his airway?",["It's clear: no abnormal sound while speaking","It's obstructed","You can't tell","He needs oxygen"],"Checklist 4.7.1: no abnormal sound while the patient is speaking means the airway is clear. Audible breathing may mean an obstruction."],
+["abcde","Which method keeps an airway open?",["Head-tilt–chin-lift","Flexing the neck forward","Lying them flat with a pillow under the head","Pressing on the trachea"],"Your note: if the airway is open, keep it that way with head-tilt–chin-lift. Call for help if it's blocked."],
+["abcde","How long do you count the respiratory rate?",["A full minute","10 seconds","15 seconds","Until you lose count"],"Your note: check RR for a minute. Normal is 12–20 breaths per minute."],
+["abcde","How do you check the trachea is midline?",["Gently run your finger down the front of the neck","Shine a pen torch at it","Listen with the stethoscope","Ask him to cough"],"Breathing step: run your finger through the neck to check the trachea is midline."],
+["abcde","You see accessory muscle use and grunting. What do you try first?",["Reposition him (e.g. sit him upright) and tell the RN","Give him a drink","Leave and come back later","Lay him flat"],"Your note (in red): if they're having difficulty, try repositioning the patient."],
+["abcde","Which of these is a sign of NORMAL breathing (4.7.2)?",["Equal rise and fall of the chest","Cyanosis","On oxygen therapy","Short of breath"],"Normal: regular, equal chest rise and fall, no SOB, no oxygen therapy, no cyanosis."],
+["abcde","Which check belongs under C (Circulation)?",["Capillary refill of fingers and toes","PEARL","AMT4","Skin tears"],"C: vital signs, pulse (regularity, equality, strength), warmth of all 4 limbs, capillary refill, lower-limb swelling."],
+["abcde","Which check belongs under D (Disability)?",["GCS, PEARL and AMT4","Bowel sounds","Lower limb swelling","Respiratory rate"],"Checklist 4.7.4: GCS, PEARL and AMT4. Your notes add AVPU, BGL, limb strength, medications and history."],
+["abcde","During E (Exposure), what will you find on Ivan?",["A chronic diabetic wound on his right leg","A plaster cast on his arm","An IV cannula","A new burn"],"Your note (in red): Mr. Ivan has a chronic wound on his right leg. Take note!"],
+["abcde","Why do we do the Exposure check?",["To see if any treatment is needed (skin tears, swelling, wounds)","To check his temperature","To test his memory","To weigh him"],"E: check the skin for rashes, skin tears, redness, swelling. Why? To assess if there's treatment that needs to be done."],
+// Chapter: vitals
+["vitals","Normal body temperature (from your notes)?",["36.5–37.2 °C","35.0–36.0 °C","37.5–38.5 °C","34–39 °C"],"Checking temperature shows whether he has hypothermia or hyperthermia."],
+["vitals","Normal adult heart rate?",["60–100 bpm","40–60 bpm","100–140 bpm","20–40 bpm"],"Under 60 is bradycardia, over 100 is tachycardia."],
+["vitals","Ivan's pulse is 112 bpm. That's…",["Tachycardia","Bradycardia","Normal","Hypoxia"],"Over 100 bpm = tachycardia. Document it and report it to the RN."],
+["vitals","Normal SpO₂ (from your notes)?",["94% or more","80% or more","Exactly 100% only","70–90%"],"SpO₂ shows whether there's enough oxygen in the blood."],
+["vitals","Normal adult respiratory rate?",["12–20 breaths/min","4–8 breaths/min","25–35 breaths/min","40–60 breaths/min"],"Count it for a full minute."],
+["vitals","How must you take Ivan's BP in this task?",["Manually (with a stethoscope)","Only with the automatic machine","Guess from his pulse","Ask Colleen what it usually is"],"The scenario says vital signs with MANUAL BP, pulse and RR."],
+["vitals","What's Ivan's usual BP?",["About 130/90 mmHg","About 90/60 mmHg","About 180/110 mmHg","About 110/70 mmHg"],"Medicines plus diet keep it around 130/90. The normal range is 90/60–120/80."],
+["vitals","Normal capillary refill?",["About 2 seconds or less","5–6 seconds","10 seconds","There's no normal range"],"Press, release, and the colour should return quickly. The Clinsoft form records \"3 sec\" or \">3 sec\"."],
+["vitals","Which is NOT one of the 5 pre-discharge vital signs (4.34)?",["BGL","Temperature","SpO₂","Respiratory rate"],"Pre-discharge vitals: temperature, BP, HR, RR, SpO₂."],
+["vitals","How do you calculate BMI?",["Weight (kg) ÷ height (m)²","Height ÷ weight","Weight × height","Weight (kg) ÷ age"],"Checklist 4.17: get height and weight, calculate BMI, document it."],
+// Chapter: neuro
+["neuro","AVPU: what does the V mean?",["Responds to Voice","Vital signs","Very alert","Vomiting"],"A = Alert, V = Voice, P = Pain, U = Unresponsive/unconscious."],
+["neuro","What is a normal GCS?",["15/15","3/15","10/15","20/20"],"GCS runs from 3 (lowest) to 15 (fully alert)."],
+["neuro","The three parts of the GCS are…",["Eye opening, verbal response, motor response","Pulse, BP, temperature","Pupils, speech, hearing","Alert, voice, pain"],"E (1–4) + V (1–5) + M (1–6) = total out of 15."],
+["neuro","Ivan opens his eyes when you speak to him. Eye score?",["E3 (to speech)","E4","E2","E1"],"Spontaneously 4 · To speech 3 · To pain 2 · None 1."],
+["neuro","He talks but is confused about where he is. Verbal score?",["V4 (confused)","V5","V3","V2"],"Oriented 5 · Confused 4 · Inappropriate words 3 · Incomprehensible sounds 2 · None 1."],
+["neuro","Eyes open spontaneously, confused, obeys commands. Total GCS?",["14","15","13","12"],"E4 + V4 + M6 = 14."],
+["neuro","What does PEARL stand for?",["Pupils Equal And Reactive to Light","Pulse, Eyes, Arms, Reflexes, Legs","Pain Evaluation And Response Level","Patient Eyes Are Really Large"],"PEARLA adds Accommodation. Use a pen torch."],
+["neuro","Normal pupil size (from your notes)?",["3–5 mm","0.5–1 mm","7–8 mm","10 mm"],"The form lets you pick 1–8 mm for each eye, plus PEARL yes/no."],
+["neuro","Which is NOT one of the AMT4 questions?",["Who is the Prime Minister?","Full name and date of birth","Age","Name of this place"],"AMT4: name & DOB, age, month & year, name of the place."],
+["neuro","He gets one AMT4 question wrong. What happens next?",["The RN or physician does a further delirium assessment","Nothing, ignore it","You start CPR","He is discharged"],"Any wrong answer → further delirium assessment by the RN or physicians (not part of your task)."],
+["neuro","Limb power scored 3 means…",["Active movement against gravity","Normal power","No movement","Only a flicker"],"5 normal · 4 against resistance · 3 against gravity · 2 gravity eliminated · 1 flicker · 0 none."],
+["neuro","Which side would you expect weaker limb power on for Ivan?",["Left side","Right side","Both equally","Neither"],"He has left-sided hemiparesis after a stroke 2 years ago, which is also why he limps on the L."],
+["neuro","Which is NOT part of neurovascular observations?",["Bowel sounds","Colour and temperature","Capillary refill and pulse","Sensation, motion and pain"],"Neurovascular (4.14), all 4 limbs: extremity, oedema, colour, temperature, cap refill, sensation, motion, pain, pulse."],
+["neuro","Before a BGL finger prick, your notes say…",["Ask him to wash his hands, no alcohol swab","Always use two alcohol swabs","Prick the earlobe","Warm the strip in your pocket"],"Alcohol can affect the reading. Clean, dry hands are best."],
+["neuro","The assessor tells you Ivan's BGL is 10.2 mmol/L. This is…",["High: hyperglycaemia, so document and report to the RN","Normal","Low: hypoglycaemia","Impossible"],"Normal is about 4–8 mmol/L. 10.2 is above that."],
+["neuro","The 4AT attention test asks him to…",["Say the months backwards starting at December","Count to 100","Spell his name","Touch his nose"],"4AT = Alertness, AMT4, Attention (months backwards), Acute change."],
+["neuro","A 4AT total of 4 or more suggests…",["Possible delirium","No problem at all","Low falls risk","Malnutrition"],"≥4 possible delirium · 1–3 possible cognitive impairment · 0 unlikely."],
+// Chapter: h2t
+["h2t","How many body systems are on your head-to-toe list?",["9","5","12","3"],"CNS, sensory, CVS, respiratory, GIT, renal, musculoskeletal, integumentary, endocrine."],
+["h2t","Your head check includes…",["Symmetry, midline, eyes and ears level, no twitching","Listening to the skull","Measuring hat size","Checking the hair is brushed"],"Hair and skin colour match the ethnicity, normal head size, no abnormal movement, symmetrical, eyes and ears level."],
+["h2t","Which system has \"nothing to auscultate\" on the form?",["CNS","Respiratory","Cardiovascular","Gastrointestinal"],"Nothing to auscultate: CNS, renal, musculoskeletal, integumentary, endocrine."],
+["h2t","Which lung lobe is NOT on the form?",["Left middle lobe","Right middle lobe","Left upper lobe","Right lower lobe"],"The left lung has only 2 lobes. You listen to RUL, RML, RLL, LUL, LLL."],
+["h2t","Normal heart sounds are…",["Two (S1 and S2)","One","Three","None"],"Extra sounds such as a murmur or rub are documented separately."],
+["h2t","Which pulses do you palpate in the CVS check?",["Radial and dorsalis pedis","Carotid only","Femoral and popliteal","Temporal"],"Check equality, regularity and strength of both radial and both dorsalis pedis pulses."],
+["h2t","Where do you listen for bowel sounds?",["All 4 abdominal quadrants","Only the belly button","The back","Behind the knees"],"RUQ, RLQ, LUQ, LLQ. Note normoactive, hypoactive or hyperactive."],
+["h2t","Ivan's skin is best described as…",["Very frail, dry and paper-like","Oily and thick","Clammy and sweaty","Jaundiced"],"That puts him at high risk of skin tears."],
+["h2t","Koilonychia on the nails form means…",["Spoon-shaped nails","Fungal nails","Bitten nails","Painted nails"],"Other nail options: Beau's lines, clubbing, onychomycosis (fungal), pitting."],
+["h2t","Which diabetes type fits Ivan on the endocrine form?",["Type 2, oral tablets","Type 1","Type 2, insulin only","Gestational"],"His diabetes is managed with oral medicines and diet control."],
+["h2t","What sensory aids does Ivan use?",["Hearing aid (left ear) and reading glasses","Cochlear implant","Contact lenses only","None"],"Document them under the sensory system and make sure he's wearing them during assessments."],
+// Chapter: risk
+["risk","Which tool assesses falls risk?",["FRAT","Braden Scale","MST","GCS"],"FRAT = Falls Risk Assessment Tool (4.20)."],
+["risk","Which tool assesses pressure injury risk?",["Braden Scale","FRAT","4AT","AMT4"],"Checklist 4.19: Braden Scale."],
+["risk","On the Braden Scale, a LOWER score means…",["Higher pressure injury risk","Lower risk","Nothing","He's ready for discharge"],"Braden looks at sensory perception, moisture, activity, mobility, nutrition, and friction & shear."],
+["risk","Ivan's FRAT category?",["High risk","Low risk","Moderate risk","Not needed"],"Any one of these makes it high: a fall in the past 12 months (he had 3) or using a walking aid (Zimmer frame)."],
+["risk","Which tool screens for malnutrition?",["MST (Malnutrition Screening Tool)","Braden","FRAT","PEARL"],"Checklist 4.21."],
+["risk","On the MST, \"unsure\" about recent weight loss scores…",["2","0","1","4"],"No = 0, Unsure = 2. A total of 2 or more means at risk of malnutrition."],
+["risk","Which urinalysis results suggest a UTI?",["Positive nitrite and leucocytes","Negative everything","High specific gravity only","pH 7"],"The assessor will prompt a positive UTI. Show how you'd identify it."],
+["risk","Urinalysis: how long do you wait before reading the strip?",["2 minutes","10 seconds","10 minutes","No wait"],"Step 8: allow 2 minutes before recording the results."],
+["risk","How do you hold the strip to read it?",["Horizontally, against the bottle's colour chart","Vertically, dripping","Upside down","Under running water"],"Holding it horizontally stops the reagents running into each other."],
+["risk","There are signs of UTI. What do you do with the urine sample?",["Keep it, closed and sterile","Pour it down the sink","Leave the lid off","Mix it with water"],"Don't dispose of it if there are signs of UTI. Close the lid and keep it sterile."],
+["risk","What do you check on the strip bottle before testing?",["The expiry date","The price","The barcode","The brand"],"Inspect the colour and odour of the urine, and check the strip expiry date."],
+["risk","Which vaccine is on the checklist (4.18)?",["Pneumococcal (23vPPV)","Yellow fever","BCG","Rabies"],"Influenza (flu), shingles, pneumococcal polysaccharide (23vPPV)."],
+["risk","What's normal skin turgor on the skin assessment?",["Under 3 seconds","Over 10 seconds","It never goes back","Exactly 5 seconds"],"Over 3 seconds is impaired (e.g. dehydration)."],
+// Chapter: ncp
+["ncp","Which is NOT one of the five 4.23 care plans?",["Hearing test plan","Pressure injury prevention","Falls prevention","Wound care (as per RN)"],"The 5: pressure injury, falls, malnutrition, mobility/transfer, wound care."],
+["ncp","After writing the care plan, what must you do (4.24)?",["Discuss it with Ivan and his family and confirm they accept it","File it without telling anyone","Only show the assessor","Wait until discharge"],"Care planning discussion: consent from the resident and the NOK (Colleen)."],
+["ncp","What does BD mean on a care plan?",["Twice a day","Before dinner","Bed day","Blood draw"],"BD = 2×, TDS = 3×, QID = 4×, PRN = as needed."],
+["ncp","Falls monitoring \"15/60\" means…",["Every 15 minutes","15 times an hour","Every 15 hours","For 15 days"],"15/60 = every 15 min · 30/60 = every 30 min · 1/24 = hourly."],
+["ncp","Which food type do you tick for Ivan?",["Soft (diabetic diet)","Pureed","Minced","FWD (full ward diet)"],"He tolerates a diabetic diet, texture modified to soft."],
+["ncp","Ivan's wound dressing frequency?",["Every 3rd day","Daily","BD","PRN only"],"Chronic diabetic wound, right leg: 3rd-daily dressing. Keep a wound chart."],
+["ncp","NFR on the care plan means…",["Not For Resuscitation","No Fluids Required","Nurse Final Review","Not Fully Recovered"],"Record whether the NFR document was sighted, not sighted or not applicable."],
+["ncp","IDDSI fluid Level 0 is…",["Thin","Extremely thick","Mildly thick","Pureed"],"0 thin · 1 slightly · 2 mildly · 3 moderately · 4 extremely thick."],
+["ncp","Which three referrals are documented (4.29)?",["Physiotherapist, podiatrist, diabetes educator","Dentist, optometrist, chef","Surgeon, radiologist, chaplain","Dietitian, psychologist, lawyer"],"Physio for mobility and falls, podiatrist for foot and wound care, diabetes educator for BGL."],
+["ncp","Mobility planning \"off bed 1x assist\" uses which aid?",["A slide sheet","A rope","Lifting under the arms","Dragging the bed sheet"],"The form says 1x/2x/4x assist (slide sheet). That also protects his fragile skin."],
+["ncp","For PM and ND shifts on the care plan you usually…",["Mark \"continue same as AM\" with or without changes","Write a whole new plan","Leave it blank","Copy yesterday's plan"],"Write any changes in the \"changes in planning\" box."],
+// Chapter: adl
+["adl","Before any ADL, you…",["Introduce yourself, explain, and gain consent","Just start the shower","Ask the assessor's permission only","Take his vitals again"],"Checklist 4.25."],
+["adl","First step when giving a shower?",["Adjust the water temperature","Take off his clothes","Encourage self-drying","Brush his hair"],"Then privacy, consent, undress, self-shower, self-dry, self-dress, self-groom."],
+["adl","Why encourage Ivan to wash and dress himself, with help as needed?",["It keeps his independence and dignity","It's faster for you","He has to do it alone","So you can leave the room"],"Self-showering, self-drying, self-dressing and self-grooming, with help as needed."],
+["adl","How many staff assist Ivan's transfer to the shower chair?",["One (assist x1)","None","Two","Four with a hoist"],"Part 2 asks for assist (x1) to the shower chair."],
+["adl","Ivan has L hemiparesis. Which side do you stand on when walking him?",["His weaker (left) side","His stronger (right) side","Behind him only","It doesn't matter"],"Support the affected side, where he's most likely to fall."],
+["adl","Dressing someone with hemiparesis:",["Dress the weak side first, undress the strong side first","Dress the strong side first","Always dress lying down","Don't let him help"],"It's easier and kinder on the weak limb."],
+["adl","Oral care: when do you check his gums for bleeding?",["Before brushing, and again after","Never","Only after lunch","Only if he complains"],"4.27.3: inspect the gums before brushing, encourage self-care, look for bleeding after brushing."],
+["adl","Bleeding gums and white round spots on the buccal wall. Best response?",["Document it in the oral assessment and report to the RN, gentle brushing","Ignore it, it's normal","Scrub harder","Give him mouthwash and say nothing"],"Possible gum disease or oral thrush. Report it, use a soft toothbrush, and care for his dentures."],
+["adl","He passes only a few hard \"pebbles\". On the Bristol chart that's…",["Type 1 (constipation)","Type 4 (normal)","Type 7 (watery)","Type 5"],"Educate on fluids, fibre and mobility, record it on the bowel chart, and report to the RN."],
+["adl","Which is NOT one of the 4 education topics in Part 2?",["Sun safety","Risk of falls","Risk of skin tears","Constipation"],"Educate about the risk of falls, bleeding, skin tears and constipation."],
+["adl","Which action RAISES his skin tear risk?",["Dragging him up the bed","Using a slide sheet","Moisturising his skin","Padding the bed rails"],"Never drag frail skin. Use slide sheets and gentle handling."],
+["adl","Foot care (4.27.4) means you…",["Inspect toes and feet for ulcers or broken skin","Cut all toenails very short","Soak his feet for an hour","Skip it because he's diabetic"],"This matters a lot for a diabetic. Encourage self-care."],
+["adl","Which ADL level fits someone who needs some help but does part of the task?",["Independent with mild/moderate assistance","Dependent","Independent","Other"],"Form levels: Independent · with mild assistance · with moderate assistance · Dependent."],
+// Chapter: dc
+["dc","Why is Ivan being transferred?",["To be with his wife Mavis at another facility","His wound got worse","He wants to go home alone","The facility is closing"],"Mavis had a stroke with hemiparesis and got a place elsewhere. He's moving for family inclusivity and personal preference."],
+["dc","First discharge step (4.30)?",["Confirm clearance from the GP/treating physician","Book a taxi","Pack his clothes","Do an ISBAR handover"],"The doctor's notes show the physician agrees to the transfer."],
+["dc","Discharge planning data includes…",["Date, time, destination and transport","His favourite food","The weather","Your roster"],"Checklist 4.33: discharge date, time, destination, contact the relevant person, safe transport."],
+["dc","Which handover framework do you use?",["ISBAR","SOAP","ABCDE","AVPU"],"Identify, Situation, Background, Assessment, Recommendation."],
+["dc","What's the B in ISBAR?",["Background","Breathing","Blood pressure","Bed"],"I-S-B-A-R."],
+["dc","Who do you inform about the discharge decision?",["Ivan, and his NOK/family (Colleen)","Only the receiving facility","Nobody until he leaves","Only the pharmacy"],"Inform both and consult their preferences, such as transport and documents (4.31–4.32)."],
+["dc","Documents in the transfer pack are…",["Copies","The only originals","Handwritten summaries","Photos on your phone"],"\"You will require to make copies of all these documents and put inside the transfer pack.\""],
+["dc","Which legal documents go in the pack?",["Advance Care Directive and Power of Attorney","Driver's licence and passport","His will and title deeds","Birth certificate"],"Legal documents: (1) ACD, (2) Power of Attorney."],
+["dc","BAF in the nursing care charts stands for…",["Behavioural Assessment Form","Blood And Fluids","Bowel Activity Forecast","Bed Allocation Form"],"Nursing charts: BGL, Fluid Balance, Bowel, BAF, Wound."],
+["dc","Readiness for discharge includes…",["Consent, vital signs, nursing assessment, family/carer preferences","Only his suitcase","The assessor's signature","Lunch being finished"],"Check the client's readiness before you organise services and transport."],
+["dc","Which referral letter example is on the checklist (4.35)?",["Social worker","Hairdresser","Personal trainer","Dentist"],"Examples: blood test, podiatrist, social worker."],
+// Chapter: always
+["always","How do you protect privacy and dignity (4.38)?",["Close the curtains and doors","Leave the door open for airflow","Talk about him in the hallway","Shower him with visitors around"],"Do this every time you assess or shower him."],
+["always","Which is NOT culturally safe practice (4.39)?",["Making choices for him to save time","Polite language","Soft tone","Offering choices"],"Offer choices and never make disrespectful comments."],
+["always","Which body language is NOT effective communication (4.40)?",["Standing with arms crossed","Eye contact","Open posture","Not interrupting"],"Also remove distractions such as noise and use appropriate pitch, volume and gestures."],
+["always","Where do you complete the documentation?",["Online in Clinsoft, and the charts in the lab","On a sticky note","Only verbally","At home next week"],"Get the obs chart signed by the assessor before you scan and upload it, and finish before you leave campus."],
+["always","Teamwork in this task (4.42) means…",["Working effectively with the RN","Doing everything alone","Letting Colleen do the care","Ignoring the MDT"],"The RN builds the NCP with you, Ivan, his family and the healthcare team."]
+];
+
+const CHAPTERS=[
+ {id:"arrive",part:1,no:"Room 1",t:"Arrival & first hello",d:"Hand hygiene, your script, ID, allergies, room safety, consent, settling in, quitting smoking.",scene:"Mr. Ivan is in the visitor's room with his daughter Colleen. He looks a little anxious. The RN asks you to help him settle in."},
+ {id:"abcde",part:1,no:"Room 2",t:"A to E primary check",d:"Airway, breathing, circulation, disability, exposure, and the why of each.",scene:"Ivan's in his room, glasses on and hearing aid in. Time for your primary assessment, starting with A."},
+ {id:"vitals",part:1,no:"Room 3",t:"Vital signs",d:"Normal ranges, manual BP, BMI and pre-discharge vitals.",scene:"You wrap the cuff around Ivan's arm. He jokes that his BP is \"always about 130 over 90, love.\""},
+ {id:"neuro",part:1,no:"Room 4",t:"Neuro corner",d:"AVPU, GCS, PEARL, AMT4, limb power, neurovascular obs, BGL, 4AT.",scene:"You ask if you can do the neurological obs chart. Ivan nods and squints at your pen torch."},
+ {id:"h2t",part:1,no:"Room 5",t:"Head-to-toe",d:"The 9 systems: what to inspect, auscultate and palpate.",scene:"Head first: symmetry, midline, eyes and ears level. Then you work down, system by system."},
+ {id:"risk",part:1,no:"Room 6",t:"Tests & risk tools",d:"Urinalysis, FRAT, Braden, MST, skin, vaccines.",scene:"A urine sample, a BGL kit and a few risk forms. Ivan asks if this is \"the exam bit\"."},
+ {id:"ncp",part:2,no:"Room 7",t:"Care plan desk",d:"The 5 plans, frequencies, diet, wound, falls, referrals.",scene:"You sit with the RN, Ivan and Colleen to turn everything you found into his Nursing Care Plan."},
+ {id:"adl",part:2,no:"Room 8",t:"Shower before lunch",d:"Transfer x1, toileting, showering, oral and foot care, education.",scene:"Ivan has decided to stay, and he'd love a shower before lunch. You notice he's limping on his left side."},
+ {id:"dc",part:3,no:"Room 9",t:"Moving day",d:"Clearance, readiness, data, transport, transfer pack, ISBAR.",scene:"News: Ivan's wife Mavis has a place at another facility after her stroke. Ivan wants to be with her, and the RN asks you to start the transfer."},
+ {id:"always",part:3,no:"Room 10",t:"All shift long",d:"Privacy, cultural safety, communication, teamwork, documentation.",scene:"Last room. These are the things the assessor watches for the whole time."}
+];
+
+/* ---------- views ---------- */
+const VIEWS=["home","play","order","cards","pack","vitals","tools","check","file"];
+function go(v){if(!VIEWS.includes(v))v="home";VIEWS.forEach(x=>{$("#v-"+x).hidden=(x!==v)});
+  $$(".tab").forEach(b=>b.setAttribute("aria-current",String(b.dataset.go===v||(v==="play"&&b.dataset.go==="play"))));
+  if(v==="home")paintMap();if(v==="play"&&!play.ch)startChapter(nextChapter());
+  window.scrollTo({top:0});store.set("view",v)}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){e.preventDefault();go(b.dataset.go)}});
+
+/* ---------- ward map ---------- */
+let prog=store.get("prog",{}); // chapterId -> {done:bool, best:n}
+function paintMap(){[1,2,3].forEach(p=>{const box=$("#map"+p);box.innerHTML="";
+  CHAPTERS.filter(c=>c.part===p).forEach(c=>{const n=Q.filter(q=>q[0]===c.id).length;const pr=prog[c.id]||{};
+    const b=document.createElement("button");b.className="room"+(pr.done?" done":"");
+    const pct=pr.done?100:Math.round(((pr.seen||0)/n)*100);
+    b.innerHTML=`<span class="no">${c.no} · ${n} questions</span><span class="t">${esc(c.t)}</span><span class="d">${esc(c.d)}</span><span class="prog"><i style="width:${pct}%"></i></span>`;
+    b.addEventListener("click",()=>{startChapter(c.id);go("play")});box.appendChild(b)})})}
+function nextChapter(){const c=CHAPTERS.find(c=>!(prog[c.id]||{}).done);return c?c.id:CHAPTERS[0].id}
+
+/* ---------- story play ---------- */
+const play={ch:null,queue:[],i:0,firstTry:0,missed:[],revisit:false,tries:0};
+function startChapter(id){const c=CHAPTERS.find(x=>x.id===id);play.ch=c;
+  play.queue=shuffle(Q.filter(q=>q[0]===id));play.i=0;play.firstTry=0;play.missed=[];play.revisit=false;renderIntro()}
+function renderIntro(){const c=play.ch;$("#play").innerHTML=`
+  <div class="qmeta"><span class="label">Part ${c.part} · ${c.no}</span><button class="btn ghost small" data-go="home">Ward map</button></div>
+  <h2>${esc(c.t)}</h2>
+  <div class="scene"><span class="who">I</span><p>${esc(c.scene)}</p></div>
+  <p class="muted">${play.queue.length} short questions. Take your time. Wrong picks just get crossed out.</p>
+  <div class="row"><button class="btn" id="goQ">Start the scene</button></div>`;
+  $("#goQ").addEventListener("click",renderQ);$("#goQ").focus()}
+function renderQ(){const c=play.ch,q=play.queue[play.i];play.tries=0;
+  const opts=shuffle(q[2].map((t,k)=>({t,ok:k===0})));
+  const total=play.queue.length;
+  const dots=play.queue.map((_,k)=>`<i class="${k<play.i?"on":""}${play.revisit?" re":""}"></i>`).join("");
+  $("#play").innerHTML=`
+   <div class="qmeta"><span class="label">${play.revisit?"Quick revisit · ":""}${esc(c.t)} · ${play.i+1} of ${total}</span><div class="dots" aria-hidden="true">${dots}</div></div>
+   <p class="q">${esc(q[1])}</p>
+   <div class="opts">${opts.map((o,k)=>`<button class="opt" data-ok="${o.ok?1:0}"><span class="k">${"ABCD"[k]}</span><span>${esc(o.t)}</span></button>`).join("")}</div>
+   <div id="fb"></div>`;
+  $$(".opt").forEach(b=>b.addEventListener("click",()=>answer(b,q)));}
+function answer(b,q){const fb=$("#fb");
+  if(b.dataset.ok==="1"){
+    $$(".opt").forEach(x=>x.disabled=true);b.classList.add("yes");
+    if(play.tries===0){if(!play.revisit)play.firstTry++;addLearn(1)}else if(!play.revisit){play.missed.push(q)}
+    const msgs=["Nice one.","Exactly right.","Yes, that's it.","Spot on.","You've got it."];
+    fb.innerHTML=`<div class="why"><b>${play.tries===0?msgs[Math.floor(Math.random()*msgs.length)]:"There it is."}</b> ${esc(q[3])}</div><div class="row" style="margin-top:12px"><button class="btn" id="nx">Next</button></div>`;
+    $("#nx").addEventListener("click",nextQ);$("#nx").focus();
+  }else{
+    play.tries++;b.classList.add("no");b.disabled=true;
+    if(play.tries>=2){const right=$$(".opt").find(x=>x.dataset.ok==="1");right.classList.add("yes");$$(".opt").forEach(x=>x.disabled=true);
+      if(!play.revisit)play.missed.push(q);
+      fb.innerHTML=`<div class="why soft"><b>Here's the answer, no stress.</b> ${esc(q[3])} <br><span class="muted">It'll come back once at the end of this room.</span></div><div class="row" style="margin-top:12px"><button class="btn" id="nx">Next</button></div>`;
+      $("#nx").addEventListener("click",nextQ);$("#nx").focus();
+    }else{fb.innerHTML=`<div class="why soft">Not quite. That one's crossed out, have another look.</div>`}
+  }
+  const pr=prog[play.ch.id]||{};pr.seen=Math.max(pr.seen||0,play.revisit?pr.seen||0:play.i+1);prog[play.ch.id]=pr;store.set("prog",prog);
+}
+function nextQ(){play.i++;
+  if(play.i<play.queue.length){renderQ();return}
+  if(!play.revisit&&play.missed.length){play.revisit=true;play.queue=shuffle(play.missed);play.i=0;
+    $("#play").innerHTML=`<h2>Quick revisit</h2><div class="scene"><span class="who">I</span><p>Let's have one more look at the ${play.queue.length} you peeked at. Second time round is how it sticks.</p></div><div class="row"><button class="btn" id="goQ">Revisit</button></div>`;
+    $("#goQ").addEventListener("click",renderQ);$("#goQ").focus();return}
+  finishChapter()}
+function finishChapter(){const c=play.ch;const pr=prog[c.id]||{};pr.done=true;prog[c.id]=pr;store.set("prog",prog);
+  const idx=CHAPTERS.indexOf(c);const nxt=CHAPTERS[idx+1];
+  const lines=["Ivan gives you a thumbs up.","Colleen says \"Thank you, nurse.\"","The RN nods: \"Good work.\"","Ivan says you're his favourite nurse (don't tell the others)."];
+  $("#play").innerHTML=`<span class="label">${esc(c.no)} visited</span><p class="cheer">Room complete</p>
+   <div class="scene"><span class="who">I</span><p>${lines[idx%lines.length]}</p></div>
+   <p>You got <b>${play.firstTry}</b> of ${Q.filter(q=>q[0]===c.id).length} on the first try${play.missed.length?`, and you went back over ${play.missed.length} more`:""}. Everything in this room counts towards "things learned".</p>
+   <div class="row">${nxt?`<button class="btn" id="nxtCh">Next room: ${esc(nxt.t)}</button>`:`<button class="btn" data-go="pack">Final mini game: pack the transfer bag</button>`}
+   <button class="btn ghost" id="again">Replay this room</button><button class="btn ghost" data-go="home">Ward map</button></div>`;
+  if(nxt)$("#nxtCh").addEventListener("click",()=>startChapter(nxt.id));
+  $("#again").addEventListener("click",()=>startChapter(c.id));toast("Room complete");}
+
+/* ---------- order puzzles ---------- */
+const ORDERS=[
+ {id:"script",t:"Your opening script",s:["Hand wash","Introduce yourself","Ask name and date of birth","Ask URN/Medicare number and allergies","Safety check the room","Explain the procedure and gain consent","A to E assessment","Head-to-toe assessment"]},
+ {id:"abcde",t:"Primary assessment",s:["Airway","Breathing","Circulation","Disability","Exposure"]},
+ {id:"abhr",t:"Hand rub with ABHR",s:["Palmful of ABHR in a cupped hand, cover all surfaces","Palm to palm","Right palm over left back of hand, fingers interlaced (and vice versa)","Palm to palm with fingers interlaced","Backs of fingers to opposite palms, fingers interlocked","Rotational rubbing of left thumb clasped in right palm (and vice versa)","Rotational rubbing of clasped fingertips in the opposite palm (and vice versa)"]},
+ {id:"urine",t:"Urinalysis",s:["Gather equipment","Hand hygiene and gloves on","Inspect colour and odour of the sample","Check strip expiry date","Draw up urine with a sterile syringe","Apply urine to strip on a paper towel","Remove excess urine from the strip","Wait 2 minutes","Hold strip horizontally and compare to the colour chart","Record results","If UTI signs: keep sample, close the lid","Gloves off, hand hygiene"]},
+ {id:"shower",t:"Showering assistance",s:["Adjust water temperature","Ensure privacy","Gain consent","Take off clothes","Encourage self-showering","Encourage self-drying","Encourage self-dressing","Encourage self-grooming"]},
+ {id:"task",t:"The whole of Task 4",s:["Settle Ivan in and orientate him to the room","Talk through the admission and quitting support","Complete the nursing assessments","Formulate the NCP with Ivan and Colleen","Gain consent and assist x1 to the shower chair","Toileting, showering, oral and foot care","Educate on falls, bleeding, skin tears, constipation","Update the care plan and referrals","Discharge (transfer) procedure","Complete documentation in Clinsoft"]},
+ {id:"dc",t:"Discharge steps",s:["Check clearance by GP/treating physician","Check readiness (consent, vitals, assessment, preferences)","Collect discharge data (date, destination, transport)","Organise community services","Organise transport","Complete documentation","ISBAR handover to the receiving facility"]},
+ {id:"isbar",t:"ISBAR handover",s:["Identify: you, Ivan, the facility","Situation: transfer to be with his wife","Background: HTN, diabetes, MI, stroke, falls","Assessment: vitals, skin, wound, risks","Recommendation: falls plan, wound care, BGL monitoring"]},
+ {id:"oral",t:"Oral care",s:["Inspect gums for bleeding before brushing","Encourage self-care with assistance as needed","Look for bleeding from the gums after brushing"]}
+];
+let ord={p:null,next:0,wrong:0,pool:[]};
+function paintOrderPicker(){const done=store.get("orderDone",{});$("#orderPicker").innerHTML=ORDERS.map(o=>`<button class="chip${ord.p&&ord.p.id===o.id?" sel":""}${done[o.id]?" good":""}" data-ord="${o.id}">${esc(o.t)}</button>`).join("");
+  $$("[data-ord]").forEach(b=>b.addEventListener("click",()=>startOrder(b.dataset.ord)))}
+function startOrder(id){ord.p=ORDERS.find(o=>o.id===id);ord.next=0;ord.wrong=0;ord.miss=0;ord.pool=shuffle(ord.p.s.map((t,i)=>({t,i})));paintOrderPicker();renderOrder()}
+function renderOrder(){const p=ord.p;const panel=$("#orderPanel");
+  panel.innerHTML=`<h3>${esc(p.t)}</h3><div class="slots">${p.s.map((t,i)=>`<div class="slot${i<ord.next?" filled":""}">${i<ord.next?esc(t):'<span class="muted">…</span>'}</div>`).join("")}</div>
+   ${ord.next<p.s.length?`<span class="label">Tap the next step</span><div class="pool">${ord.pool.filter(x=>x.i>=ord.next).map(x=>`<button class="chip${ord.miss>=2&&x.i===ord.next?" hint":""}" data-i="${x.i}">${esc(x.t)}</button>`).join("")}</div>`
+   :`<div class="why"><b>${ord.wrong===0?"Perfect order!":"All in order."}</b> ${ord.wrong===0?"Not a single wiggle.":"You got there, and that's what counts."}</div><div class="row"><button class="btn" id="ordAgain">Shuffle again</button></div>`}`;
+  $$("#orderPanel [data-i]").forEach(b=>b.addEventListener("click",()=>{const i=+b.dataset.i;
+    if(i===ord.next){ord.next++;ord.miss=0;if(ord.next===p.s.length){addLearn(p.s.length);const d=store.get("orderDone",{});d[p.id]=1;store.set("orderDone",d);paintOrderPicker();toast("Sequence complete")}renderOrder()}
+    else{ord.wrong++;ord.miss++;b.classList.remove("wob");void b.offsetWidth;b.classList.add("wob","nudge");if(ord.miss===2)renderOrder()}}));
+  const a=$("#ordAgain");if(a)a.addEventListener("click",()=>startOrder(p.id));}
+
+/* ---------- flashcards ---------- */
+const CARDS=[
+ ["Abbrev","ABHR","Alcohol-Based Hand Rub: 20–30 s, 7 steps"],["Abbrev","URN","Unit Record Number, the patient's ID number at the facility"],["Abbrev","NOK","Next of Kin. For Ivan, his daughter Colleen"],
+ ["Abbrev","AVPU","Alert · responds to Voice · responds to Pain · Unresponsive"],["Abbrev","GCS","Glasgow Coma Scale: Eye 4 + Verbal 5 + Motor 6 = 15"],["Abbrev","PEARL","Pupils Equal And Reactive to Light (+A = Accommodation)"],
+ ["Abbrev","AMT4","Name & DOB · Age · Month & year · Name of place"],["Abbrev","4AT","Alertness · AMT4 · Attention · Acute change. ≥4 = possible delirium"],["Abbrev","BGL","Blood Glucose Level. Normal 4–8 mmol/L. Assessor prompts 10.2 (high)"],
+ ["Abbrev","FRAT","Falls Risk Assessment Tool. Ivan = HIGH risk"],["Abbrev","MST","Malnutrition Screening Tool. Score ≥2 = at risk"],["Abbrev","Braden","Pressure injury risk scale. Lower score = higher risk"],
+ ["Abbrev","NCP","Nursing Care Plan, finalised over about a week"],["Abbrev","ADL","Activities of Daily Living: toileting, mobility, showering, grooming, oral care"],["Abbrev","ISBAR","Identify · Situation · Background · Assessment · Recommendation"],
+ ["Abbrev","NFR","Not For Resuscitation"],["Abbrev","ACD","Advance Care Directive (legal doc in the transfer pack)"],["Abbrev","BAF","Behavioural Assessment Form"],
+ ["Abbrev","FBC (on this form)","Fluid Balance Chart"],["Abbrev","MDT","Multidisciplinary team"],["Abbrev","SOB / WOB","Shortness Of Breath / Work Of Breathing"],
+ ["Abbrev","FWD","Full Ward Diet"],["Abbrev","IDC","Indwelling (urinary) catheter"],["Abbrev","23vPPV","Pneumococcal polysaccharide vaccine"],
+ ["Frequency","BD","Twice a day"],["Frequency","TDS","Three times a day"],["Frequency","QID","Four times a day"],["Frequency","PRN","As needed"],
+ ["Frequency","15/60","Every 15 minutes"],["Frequency","30/60","Every 30 minutes"],["Frequency","1/24","Hourly"],
+ ["Values","Temperature","36.5–37.2 °C"],["Values","Heart rate","60–100 bpm"],["Values","Respiratory rate","12–20 /min, count a full minute"],["Values","SpO₂","≥ 94 %"],
+ ["Values","Blood pressure","~90/60–120/80. Ivan's usual: 130/90"],["Values","Capillary refill","≤ 2 s (form: 3 sec / >3 sec)"],["Values","Pupil size","3–5 mm (form 1–8)"],["Values","Skin turgor","Normal < 3 s"],
+ ["Ivan","Hemiparesis side","LEFT. Stand on his left when walking him"],["Ivan","Hearing aid","Left ear"],["Ivan","Diet","Diabetic, texture modified to soft"],["Ivan","Wound","Chronic diabetic wound, right leg, every 3rd day"],
+ ["Ivan","Smoking","4 a day, wants to quit. Quitline 13 7848 + GP"],["Ivan","Dentures","Upper partial, in situ"],["Ivan","Mobility aids","Zimmer frame at home; wheelchair outdoors"],
+ ["Ivan","Part 2 findings","L limp · fragile skin · bleeding gums & white spots · pebble stool"],["Ivan","Why transfer?","To be with his wife Mavis (stroke) at another facility"],
+ ["Tools","Bristol Type 1","Separate hard lumps, like pebbles = constipation"],["Tools","IDDSI fluids","0 thin · 1 slightly · 2 mildly · 3 moderately · 4 extremely thick"],["Tools","Limb power 0–5","5 normal · 4 resistance · 3 gravity · 2 gravity eliminated · 1 flicker · 0 none"],
+ ["Tools","UTI on dipstick","Positive nitrite + leucocytes"],["Tools","Lung lobes","RUL, RML, RLL, LUL, LLL (no left middle)"],["Tools","Bowel sounds","All 4 quadrants: RUQ, RLQ, LUQ, LLQ"]
+];
+const CARD_CATS=["All","Abbrev","Frequency","Values","Ivan","Tools"];
+let fc={cat:"All",pile:[],flip:false,known:0};
+function paintCardPicker(){$("#cardPicker").innerHTML=CARD_CATS.map(c=>`<button class="chip${fc.cat===c?" sel":""}" data-cat="${c}">${c}</button>`).join("");
+  $$("[data-cat]").forEach(b=>b.addEventListener("click",()=>{fc.cat=b.dataset.cat;startCards()}))}
+function startCards(){fc.pile=shuffle(CARDS.filter(c=>fc.cat==="All"||c[0]===fc.cat));fc.known=0;fc.flip=false;paintCardPicker();renderCard()}
+function renderCard(){const p=$("#cardPanel");
+  if(!fc.pile.length){p.innerHTML=`<p class="cheer">Deck cleared</p><p>You knew all ${fc.known} cards in this deck.</p><div class="row"><button class="btn" id="fcAgain">Shuffle the deck again</button></div>`;$("#fcAgain").addEventListener("click",startCards);return}
+  const c=fc.pile[0];
+  p.innerHTML=`<div class="qmeta"><span class="label">${esc(c[0])} · ${fc.pile.length} left in pile</span><span class="muted">Tap the card to flip</span></div>
+   <div class="fc-wrap"><button class="fc${fc.flip?" flip":""}" id="fcCard" aria-label="Flip card"><div class="face front"><span class="label">${esc(c[0])}</span><b>${esc(c[1])}</b></div><div class="face back"><span class="label">${esc(c[1])}</span><span>${esc(c[2])}</span></div></button></div>
+   <div class="row"><button class="btn ghost" id="fcAgainBtn">Again later</button><button class="btn" id="fcGot">I knew it</button></div>`;
+  $("#fcCard").addEventListener("click",()=>{fc.flip=!fc.flip;$("#fcCard").classList.toggle("flip",fc.flip)});
+  $("#fcGot").addEventListener("click",()=>{fc.pile.shift();fc.known++;fc.flip=false;addLearn(1);renderCard()});
+  $("#fcAgainBtn").addEventListener("click",()=>{fc.pile.push(fc.pile.shift());fc.flip=false;renderCard()});}
+
+/* ---------- transfer pack ---------- */
+const PACK=[
+ ["Doctor's notes (agreeing to transfer)",1],["COVID-19 test result",1],["Recent blood test results",1],["Recent scan results",1],["Medication charts",1],
+ ["BGL chart",1],["Fluid Balance Chart",1],["Bowel chart",1],["Behavioural Assessment Form (BAF)",1],["Wound chart",1],["Nursing Care Plan",1],
+ ["Advance Care Directive",1],["Power of Attorney",1],["Referral letters (if any)",1],
+ ["Ivan's TV remote",0],["The staff roster",0],["Your OSCA marking sheet",0],["Lunch menu for next week",0],["Another resident's care plan",0],["Colleen's shopping list",0]];
+let pk={order:shuffle(PACK.map((x,i)=>i)),sel:new Set(),sealed:false};
+function renderPack(){const p=$("#packPanel");
+  p.innerHTML=`<div class="pool">${pk.order.map(i=>{const it=PACK[i];let cls="chip";
+     if(pk.sealed){cls+=it[1]?(pk.sel.has(i)?" good":" miss"):(pk.sel.has(i)?" bad":"")}else if(pk.sel.has(i))cls+=" sel";
+     return `<button class="${cls}" data-pk="${i}" ${pk.sealed?"disabled":""}>${esc(it[0])}</button>`}).join("")}</div>
+   <div id="pkRes"></div>
+   <div class="row">${pk.sealed?`<button class="btn" id="pkAgain">Pack again</button>`:`<button class="btn" id="pkSeal">Seal the pack</button><span class="muted mono">${pk.sel.size} selected</span>`}</div>`;
+  $$("[data-pk]").forEach(b=>b.addEventListener("click",()=>{const i=+b.dataset.pk;pk.sel.has(i)?pk.sel.delete(i):pk.sel.add(i);renderPack()}));
+  if(pk.sealed){const right=PACK.filter((x,i)=>x[1]&&pk.sel.has(i)).length,total=PACK.filter(x=>x[1]).length,extra=PACK.filter((x,i)=>!x[1]&&pk.sel.has(i)).length;
+    $("#pkRes").innerHTML=`<div class="why${right===total&&!extra?"":" soft"}"><b>${right} of ${total} packed${extra?`, plus ${extra} that stay behind`:""}.</b> Green = packed correctly · yellow = should have gone in · crossed out = doesn't belong. Remember, these are all <b>copies</b>.</div>`;
+    $("#pkAgain").addEventListener("click",()=>{pk={order:shuffle(PACK.map((x,i)=>i)),sel:new Set(),sealed:false};renderPack()})}
+  else $("#pkSeal").addEventListener("click",()=>{pk.sealed=true;const right=PACK.filter((x,i)=>x[1]&&pk.sel.has(i)).length;addLearn(right);renderPack()});}
+
+/* ---------- vitals check ---------- */
+const r=(a,b,d)=>{const v=a+Math.random()*(b-a);return d?v.toFixed(d):Math.round(v)};
+const VITALS=[
+ {n:"Temperature",u:"°C",norm:()=>r(36.6,37.1,1),bad:[[()=>r(34.6,35.8,1),"Low: hypothermia"],[()=>r(37.9,39.4,1),"High: hyperthermia / fever"]],range:"36.5–37.2 °C"},
+ {n:"Heart rate",u:"bpm",norm:()=>r(62,98),bad:[[()=>r(38,52),"Bradycardia (<60)"],[()=>r(108,140),"Tachycardia (>100)"]],range:"60–100 bpm"},
+ {n:"Respiratory rate",u:"/min",norm:()=>r(13,19),bad:[[()=>r(6,9),"Too slow (<12)"],[()=>r(24,34),"Too fast (>20)"]],range:"12–20 /min"},
+ {n:"SpO₂",u:"%",norm:()=>r(95,100),bad:[[()=>r(84,91),"Low oxygen (<94%)"]],range:"≥ 94 %"},
+ {n:"Blood pressure",u:"mmHg",norm:()=>r(100,120)+"/"+r(64,79),bad:[[()=>r(76,86)+"/"+r(44,52),"Hypotension (low BP)"],[()=>r(152,182)+"/"+r(96,110),"Hypertension (high BP)"]],range:"90/60–120/80 mmHg"},
+ {n:"BGL",u:"mmol/L",norm:()=>r(4.6,7.6,1),bad:[[()=>r(2.2,3.4,1),"Hypoglycaemia (low)"],[()=>r(10,16,1),"Hyperglycaemia (high), like the assessor's 10.2"]],range:"4–8 mmol/L"},
+ {n:"Capillary refill",u:"seconds",norm:()=>r(1,2),bad:[[()=>r(4,6),"Delayed: poor perfusion"]],range:"≤ 2 s"},
+ {n:"GCS",u:"/ 15",norm:()=>15,bad:[[()=>r(8,13),"Reduced consciousness"]],range:"15 / 15"},
+ {n:"Pupils",u:"",norm:()=>"4 mm, equal & reactive",bad:[[()=>"3 mm & 6 mm, unequal","Unequal pupils: report now"],[()=>"7 mm, non-reactive","Not reactive to light: report now"]],range:"3–5 mm, PEARL"}
+];
+let vt={cur:null,n:0,right:0};
+function newVital(){const v=VITALS[Math.floor(Math.random()*VITALS.length)];const bad=Math.random()<0.5;
+  if(bad){const b=v.bad[Math.floor(Math.random()*v.bad.length)];vt.cur={v,val:b[0](),bad:true,why:b[1]}}else vt.cur={v,val:v.norm(),bad:false,why:"Within normal range"};renderVital()}
+function renderVital(ans){const c=vt.cur,p=$("#vitPanel");
+  p.innerHTML=`<div class="qmeta"><span class="label">Reading ${vt.n+1}</span><span class="mono muted">${vt.right} / ${vt.n} so far</span></div>
+   <div class="vital"><span class="label">${esc(c.v.n)}</span><span class="v">${esc(c.val)}</span><span class="muted">${esc(c.v.u)}</span></div>
+   ${ans==null?`<div class="row"><button class="btn" id="vN">Normal</button><button class="btn ghost" id="vF">Flag to RN</button><span class="muted">or press N / F</span></div>`:
+   `<div class="why${ans===c.bad?"":" soft"}"><b>${ans===c.bad?"Good call.":"Not this time."}</b> ${esc(c.why)}. Normal ${esc(c.v.n.toLowerCase())}: <span class="mono">${esc(c.v.range)}</span>.</div><div class="row"><button class="btn" id="vNext">Next reading</button></div>`}`;
+  if(ans==null){$("#vN").addEventListener("click",()=>judge(false));$("#vF").addEventListener("click",()=>judge(true))}
+  else{$("#vNext").addEventListener("click",newVital);$("#vNext").focus()}}
+function judge(flag){if(!vt.cur||vt.cur.done)return;vt.cur.done=true;vt.n++;if(flag===vt.cur.bad){vt.right++;addLearn(1)}renderVital(flag)}
+document.addEventListener("keydown",e=>{if($("#v-vitals").hidden||!vt.cur||vt.cur.done)return;if(e.target.closest("input,select"))return;
+  if(e.key==="n"||e.key==="N")judge(false);if(e.key==="f"||e.key==="F")judge(true)});
+
+/* ---------- scoring tools ---------- */
+function sel(id,label,opts){return `<label for="${id}">${label}<select id="${id}">${opts.map(o=>`<option value="${o[1]}">${esc(o[0])}</option>`).join("")}</select></label>`}
+function buildTools(){$("#tools").innerHTML=`
+ <div class="tool"><h3>Glasgow Coma Scale</h3>
+  ${sel("gE","Eye opening",[["Spontaneously (4)",4],["To speech (3)",3],["To pain (2)",2],["None (1)",1]])}
+  ${sel("gV","Verbal response",[["Oriented (5)",5],["Confused (4)",4],["Inappropriate words (3)",3],["Incomprehensible sounds (2)",2],["None (1)",1]])}
+  ${sel("gM","Motor response",[["Obeys commands (6)",6],["Localises to pain (5)",5],["Withdraws (4)",4],["Flexion to pain (3)",3],["Extension to pain (2)",2],["None (1)",1]])}
+  <div class="result" id="gR"></div></div>
+ <div class="tool"><h3>4AT (delirium)</h3>
+  ${sel("aA","Alertness",[["Normal (0)",0],["Mild sleepiness <10 s after waking (0)",0],["Clearly abnormal (4)",4]])}
+  ${sel("aB","AMT4",[["No mistakes (0)",0],["1 mistake (1)",1],["2+ mistakes / untestable (2)",2]])}
+  ${sel("aC","Attention: months backwards",[["7+ correct (0)",0],["Starts but <7 / refuses (1)",1],["Untestable (2)",2]])}
+  ${sel("aD","Acute change / fluctuating",[["No (0)",0],["Yes (4)",4]])}
+  <div class="result" id="aR"></div></div>
+ <div class="tool"><h3>Malnutrition Screening Tool</h3>
+  ${sel("mA","Lost weight recently without trying?",[["No (0)",0],["Unsure (2)",2],["Yes, 1–3 kg (1)",1],["Yes, 4–6 kg (2)",2],["Yes, 7–10 kg (3)",3],["Yes, >10 kg (4)",4],["Yes, unsure how much (2)",2]])}
+  ${sel("mB","Eating poorly from decreased appetite?",[["No (0)",0],["Yes (1)",1]])}
+  <div class="result" id="mR"></div></div>
+ <div class="tool"><h3>FRAT (falls risk)</h3>
+  ${[["Had a fall in the past 12 months",1],["Unsteady walking/transferring or uses a walking aid",1],["Confused / cognitive impairment / wrong on any AMT4 question",0],["Urinary or faecal frequency, urgency or nocturia",0],["Agitation / aggression",0]].map((x,i)=>`<label class="check"><input type="checkbox" id="f${i}" ${x[1]?"checked":""}> ${esc(x[0])}</label>`).join("")}
+  <div class="result" id="fR"></div><span class="muted" style="font-size:.85rem">Pre-ticked with Ivan's two (3 falls, Zimmer frame).</span></div>
+ <div class="tool"><h3>BMI</h3>
+  <label for="bH">Height (cm)<input type="number" id="bH" value="183" min="50" max="250"></label>
+  <label for="bW">Weight (kg)<input type="number" id="bW" value="64" min="20" max="300"></label>
+  <div class="result" id="bR"></div><span class="muted" style="font-size:.85rem">Example numbers for a lean, tall man like Ivan. Use the real ones in the lab.</span></div>`;
+ const upd=()=>{const g=+$("#gE").value+ +$("#gV").value+ +$("#gM").value;$("#gR").innerHTML=`GCS <span class="mono">${g}/15</span> · ${g===15?"fully alert":g>=13?"mild impairment, report to RN":g>=9?"moderate impairment, report now":"severe, emergency"}`;
+  const a=+$("#aA").value+ +$("#aB").value+ +$("#aC").value+ +$("#aD").value;$("#aR").innerHTML=`4AT <span class="mono">${a}</span> · ${a>=4?"possible delirium ± cognitive impairment":a>=1?"possible cognitive impairment":"delirium or severe cognitive impairment unlikely"}`;
+  const m=+$("#mA").value+ +$("#mB").value;$("#mR").innerHTML=`MST <span class="mono">${m}</span> · ${m>=2?"at risk of malnutrition":"no risk of malnutrition"}`;
+  const f=[0,1,2,3,4].some(i=>$("#f"+i).checked);$("#fR").innerHTML=`Category: <span class="mono">${f?"HIGH":"Moderate / Low"}</span> · ${f?"one or more boxes ticked":"none ticked, but may still be at risk"}`;
+  const h=+$("#bH").value/100,w=+$("#bW").value;const b=h>0?w/(h*h):0;$("#bR").innerHTML=`BMI <span class="mono">${b?b.toFixed(1):"–"}</span> kg/m² · ${!b?"":b<18.5?"underweight":b<25?"healthy range":b<30?"overweight":"obese"}`;};
+ $$("#tools select,#tools input").forEach(x=>x.addEventListener("input",upd));upd();}
+
+/* ---------- checklist ---------- */
+const CK=[
+ ["Introduction & settling",[["4.1","Introduce self; identify the resident and family member(s)"],["4.2","Hand hygiene with ABHR before touching (20–30 s, 7 steps)"],["4.3","Help to the room: bags, Zimmer frame support, time to walk"],["4.4","Orientate the resident to the room"]]],
+ ["Health assessments",[["4.5","Gather equipment: auto BP machine, stethoscope, pen torch, BGL kit, urinalysis kit, scales, height tape"],["4.6","Hand hygiene with ABHR before touching"],["4.7.1","Airway: no abnormal sound while speaking"],["4.7.2","Breathing: regular, equal chest rise, no SOB, no O₂, no cyanosis"],["4.7.3","Circulation: T, BP, HR, RR, SpO₂; pulse; warmth of 4 limbs; cap refill; lower-limb swelling"],["4.7.4","Disability: GCS, PEARL, AMT4"],["4.7.5","Exposure: swelling, bruising, skin tears, IV cannula"],["4.8","Allergy history: medical, food, other"],["4.9","Medical history across the 9 systems"],["4.10","Surgical history: CVS, respiratory, GI, renal"],["4.11","Medication history from the medication list"],["4.12","Family/relationship: marital, NOK, NOK relationship, lifestyle"],["4.13","Neuro assessment: GCS, PEARL"],["4.14","Neurovascular of all 4 limbs (9 checks)"],["4.15","BGL"],["4.16","Urinalysis (12 steps)"],["4.17","Height, weight, BMI"],["4.18","Vaccinations: flu, shingles, 23vPPV"]]],
+ ["Risk assessments",[["4.19","Pressure injury risk (Braden)"],["4.20","Falls risk (FRAT)"],["4.21","Malnutrition (MST)"],["4.22","Delirium risk (4AT)"]]],
+ ["Nursing care plan",[["4.23.1","Pressure injury prevention plan"],["4.23.2","Falls prevention plan"],["4.23.3","Malnutrition prevention plan"],["4.23.4","Mobility/transfer plan"],["4.23.5","Wound care plan (as per RN)"],["4.24","Discuss with resident/family/carers and confirm acceptance"]]],
+ ["ADL & review",[["4.25","Introduce self, explain, consent for ADL"],["4.26","Safe manual handling: sit to stand, walking aid, ADL assistance"],["4.27.1","Toileting: consent to undress, undress, allow time"],["4.27.2","Showering: temperature, privacy, consent, undress, self-shower/dry/dress/groom"],["4.27.3","Oral care: gums before brushing, self-care, bleeding after"],["4.27.4","Foot care: toes and feet for ulcers or broken skin, self-care"],["4.28","Update the care plan"],["4.29","Referrals: physio, podiatrist, diabetes educator"]]],
+ ["Discharge",[["4.30","Confirm the discharge decision from the GP and document it"],["4.31","Inform the resident; consult preferences"],["4.32","Inform NOK/family/carer; consult preferences"],["4.33","Planning data: date, time, destination, contact, safe transport"],["4.34","Pre-discharge vitals: T, BP, HR, RR, SpO₂"],["4.35","Referral letters: blood test, podiatrist, social worker"],["4.36","Arrange transport"],["4.37","ISBAR handover"]]],
+ ["Throughout",[["4.38","Privacy and dignity: curtains, doors"],["4.39","Cultural safety: polite, soft tone, choices, no disrespect"],["4.40","Communication: no distractions, eye contact, no interrupting, pitch, open posture, gestures"],["4.41","Link theory to practice"],["4.42","Teamwork with the RN"],["✓","Assessor signs the drug chart and obs chart"]]]
+];
+let ckState=store.get("ck",{}),ckArm=false;
+function renderCk(){let all=0,on=0;$("#ck").innerHTML=CK.map(g=>`<h3>${esc(g[0])}</h3>`+g[1].map(it=>{all++;const k=it[0]+it[1].slice(0,6);if(ckState[k])on++;
+   return `<label class="${ckState[k]?"on":""}"><input type="checkbox" data-ck="${esc(k)}" ${ckState[k]?"checked":""}><span class="n">${esc(it[0])}</span><span>${esc(it[1])}</span></label>`}).join("")).join("");
+  $("#ckBar").style.width=(all?on/all*100:0)+"%";$("#ckCount").textContent=on+" / "+all+" practised";
+  $$("[data-ck]").forEach(c=>c.addEventListener("change",()=>{ckState[c.dataset.ck]=c.checked;store.set("ck",ckState);if(c.checked)addLearn(1);renderCk()}))}
+$("#ckReset").addEventListener("click",()=>{if(!ckArm){ckArm=true;$("#ckReset").textContent="Tap again to clear";setTimeout(()=>{ckArm=false;$("#ckReset").textContent="Clear ticks"},3000);return}
+  ckState={};store.set("ck",ckState);ckArm=false;$("#ckReset").textContent="Clear ticks";renderCk()});
+
+/* ---------- clue board ---------- */
+const CLUES=[
+ ["3 falls last month + Zimmer frame","FRAT = HIGH. Falls prevention plan, physio referral, call bell and frame in reach, non-slip footwear, assist x1."],
+ ["Very frail, dry, paper-like skin","Skin tear and pressure injury risk: Braden, skin assessment, moisturise, slide sheet (never drag), padded rails."],
+ ["Chronic diabetic wound, R leg","Exposure finding. Wound chart, dressing every 3rd day as per RN, podiatrist, neurovascular obs of the leg."],
+ ["Diabetes on oral meds","BGL (prompt 10.2 = high, report), soft diabetic diet, diabetes educator, foot care."],
+ ["Hypertension ~130/90, past MI","Manual BP, CVS assessment. Nurses now manage his medicines."],
+ ["Left hemiparesis after stroke","Limb power and neuro obs. Stand on his left when walking him; dress the left side first."],
+ ["Anxious, pleasantly confused","AMT4 / 4AT. Calm reassurance, orientate him, involve Colleen."],
+ ["Hearing aid L ear, reading glasses","Check they're on and working before assessing. Face him and reduce noise."],
+ ["Upper partial dentures, soft diet","Oral health assessment, denture care, MST, food type: soft."],
+ ["Smokes 4/day, wants to quit","Quitline 13 7848, GP for nicotine replacement, tell the RN."],
+ ["Bleeding gums, white spots on buccal wall","Oral cavity assessment, soft toothbrush, report to RN, bleeding education."],
+ ["Pebble-like stool","Bristol Type 1, constipation. Bowel chart, fluids, fibre, mobility, report."],
+ ["Used to self-medicate","Medication history; nurses now give his medicines; medication chart reviewed by the doctor."],
+ ["Wife Mavis moved to another facility","Discharge/transfer: GP clearance, transfer pack, transport, ISBAR handover."]
+];
+function renderClues(){$("#clues").innerHTML=CLUES.map((c,i)=>`<button class="clue" data-clue="${i}"><b>${esc(c[0])}</b><span class="tap">Tap to reveal</span><span class="a">${esc(c[1])}</span></button>`).join("");
+  $$("[data-clue]").forEach(b=>b.addEventListener("click",()=>b.classList.toggle("open")))}
+
+/* ---------- script name ---------- */
+const nameIn=$("#nurseName");nameIn.value=store.get("name","");
+function paintName(){const v=nameIn.value.trim();$$(".nn").forEach(s=>s.textContent=v||"[your name]")}
+nameIn.addEventListener("input",()=>{store.set("name",nameIn.value);paintName()});
+
+/* ---------- boot ---------- */
+paintLearn();paintMap();paintOrderPicker();startOrder("script");paintCardPicker();startCards();renderPack();newVital();buildTools();renderCk();renderClues();paintName();
+const h=(location.hash||"").slice(1);go(VIEWS.includes(h)?h:"home");
+window.addEventListener("hashchange",()=>{const x=location.hash.slice(1);if(VIEWS.includes(x))go(x)});
+})();
+</script>
